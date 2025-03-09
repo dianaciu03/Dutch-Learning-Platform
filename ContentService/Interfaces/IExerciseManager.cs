@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ContentService.Domain;
+using ContentService.DTOs;
 
 namespace ContentService.Interfaces
 {
     public interface IExerciseManager
     {
-       void AddExercise(int id, List<ExerciseType> types, CEFRLevel level, IEnumerable<IExerciseComponent> exerciseComponents);
+       void CreateExercise(CreateExerciseRequest request);
         Exercise GetExerciseById(int id);
         List<Exercise> GetAllExercises();
         bool UpdateExercise(int id, List<ExerciseType> types, CEFRLevel level, IEnumerable<IExerciseComponent> exerciseComponents);

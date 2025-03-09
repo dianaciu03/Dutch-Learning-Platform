@@ -10,8 +10,13 @@ namespace ContentService.ExerciseComponents
     public class ReadingComponent: IExerciseComponent
     {
         public const string INSTRUCTION = "Read the following text and answer the questions below.";
+        public static string Instruction => INSTRUCTION;
         public string givenText { get; private set; }
         public List<string> questions { get; private set; }
+
+        public ReadingComponent() 
+        { 
+        }
 
         public ReadingComponent(string givenText, List<string> questions)
         {

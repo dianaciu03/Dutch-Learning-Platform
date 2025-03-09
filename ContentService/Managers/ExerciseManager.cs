@@ -4,6 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ContentService.Domain;
+using ContentService.DTOs;
+using ContentService.ExerciseComponents;
+using ContentService.Helpers;
 using ContentService.Interfaces;
 
 namespace ContentService.Managers
@@ -13,10 +16,10 @@ namespace ContentService.Managers
         private readonly List<Exercise> _exercises = [];
 
         // Create
-        public void AddExercise(int id, List<ExerciseType> types, CEFRLevel level, IEnumerable<IExerciseComponent> exerciseComponents)
+        public void CreateExercise(CreateExerciseRequest request)
         {
-            var exercise = new Exercise(id, types, level, exerciseComponents);
-            _exercises.Add(exercise);
+            //var exercise = new Exercise(request.ExerciseTypes, request.Level);
+            //_exercises.Add(exercise);
         }
 
         // Read
@@ -28,6 +31,24 @@ namespace ContentService.Managers
         public List<Exercise> GetAllExercises()
         {
             return _exercises;
+        }
+
+        public IExerciseComponent CreateExerciseComponent(CreateExerciseComponentRequest request)
+        {
+            ExerciseType type = EnumConverter.ParseExerciseType(request.ComponentType);
+
+            IExerciseComponent component = type switch
+            {
+                ExerciseType.Reading => new ReadingComponent(),
+                ExerciseType.Vocabulary => new VocabularyComponent(),
+                ExerciseType.Listening => new ListeningComponent(),
+                ExerciseType.Writing => new WritingComponent(),
+                ExerciseType.Speaking => new SpeakingComponent(),
+                ExerciseType.Grammar => new GrammarComponent(),
+                _ => throw new ArgumentException($"Unsupported exercise type: {request.ComponentType}")
+            };
+
+            return component;
         }
 
         // Update

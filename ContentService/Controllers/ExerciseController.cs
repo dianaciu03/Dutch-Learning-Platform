@@ -5,30 +5,35 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using ContentService.Domain;
+using ContentService.DTOs;
 using ContentService.Interfaces;
-using ContentService.Managers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ContentService.Controllers
 {
     [ApiController]
     [Route("api/exercises")]
-    public class ExerciseController : ControllerBase
+    public class ExerciseController(IExerciseManager exerciseManager) : ControllerBase
     {
-        private readonly ExerciseManager _exerciseManager;
-
-        public ExerciseController()
-        {
-            _exerciseManager = new ExerciseManager();
-        }
+        private readonly IExerciseManager _exerciseManager = exerciseManager;
 
         // Create
         [HttpPost]
-        public IActionResult AddExercise(int id, List<ExerciseType> types, CEFRLevel level, IEnumerable<IExerciseComponent> exerciseComponents)
-        {
-            _exerciseManager.AddExercise(id, types, level, exerciseComponents);
-            return Ok();
-        }
+        //public async Task<IActionResult> CreateExercise([FromBody] CreateExerciseRequest request)
+        //{
+        //    if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        //    var createdExercise = await _exerciseManager.CreateExercise(request);
+        //    var response = new ExerciseResponse
+        //    {
+        //        Id = createdExercise.Id,
+        //        ExerciseTypes = createdExercise.ExerciseTypes,
+        //        Level = createdExercise.Level,
+        //        Grade = createdExercise.Grade
+        //    };
+
+        //    return CreatedAtAction(nameof(GetExerciseById), new { id = response.Id }, response);
+        //}
 
         // Read
         [HttpGet("{id}")]

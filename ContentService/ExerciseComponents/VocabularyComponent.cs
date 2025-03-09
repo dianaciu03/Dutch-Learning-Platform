@@ -13,6 +13,10 @@ namespace ContentService.ExerciseComponents
         public int nrOfWordPairs { get; private set; }
         public (string DutchWord, string EnglishWord)[] WordPairs { get; private set; }
 
+        public VocabularyComponent()
+        {
+        }
+
         public VocabularyComponent(int numberOfWordPairs, List<(string, string)> wordPairs)
         {
             nrOfWordPairs = numberOfWordPairs;
