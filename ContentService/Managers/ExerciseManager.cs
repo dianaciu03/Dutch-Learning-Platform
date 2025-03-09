@@ -16,10 +16,21 @@ namespace ContentService.Managers
         private readonly List<Exercise> _exercises = [];
 
         // Create
-        public void CreateExercise(CreateExerciseRequest request)
+        public bool CreateExercise(CreateExerciseRequest request)
         {
-            //var exercise = new Exercise(request.ExerciseTypes, request.Level);
-            //_exercises.Add(exercise);
+            try
+            {
+                var exerciseTypes = request.ExerciseTypes.Select(type => EnumConverter.ParseExerciseType(type)).ToList();
+                var level = EnumConverter.ParseCEFRLevel(request.Level);
+                var exercise = new Exercise(exerciseTypes, level, request.ExerciseComponents);
+                _exercises.Add(exercise);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                return false;
+            }
         }
 
         // Read
@@ -33,7 +44,7 @@ namespace ContentService.Managers
             return _exercises;
         }
 
-        public IExerciseComponent CreateExerciseComponent(CreateExerciseComponentRequest request)
+        public ComponentResponse CreateExerciseComponent(CreateExerciseComponentRequest request)
         {
             ExerciseType type = EnumConverter.ParseExerciseType(request.ComponentType);
 
@@ -48,7 +59,7 @@ namespace ContentService.Managers
                 _ => throw new ArgumentException($"Unsupported exercise type: {request.ComponentType}")
             };
 
-            return component;
+            return new ComponentResponse { Component = component };
         }
 
         // Update
@@ -61,7 +72,7 @@ namespace ContentService.Managers
             }
 
             // Assuming Exercise has methods to update its properties
-            exercise = new Exercise(id, types, level, exerciseComponents);
+            exercise = new Exercise(types, level, exerciseComponents);
             return true;
         }
 

@@ -16,9 +16,8 @@ namespace ContentService.Domain
 
         private readonly IEnumerable<IExerciseComponent> _exerciseComponents;
 
-        public Exercise(int id, List<ExerciseType> types, CEFRLevel level, IEnumerable<IExerciseComponent> exerciseComponents)
+        public Exercise(List<ExerciseType> types, CEFRLevel level, IEnumerable<IExerciseComponent> exerciseComponents)
         {
-            this.Id = id;
             this.ExerciseTypes = types;
             this.Level = level;
             this.Grade = 0.0;

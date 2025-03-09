@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ContentService.Domain;
+using ContentService.Interfaces;
 
 namespace ContentService.DTOs
 {
@@ -11,5 +12,6 @@ namespace ContentService.DTOs
     {
         public required List<string> ExerciseTypes { get; set; }
         public required string Level { get; set; }
+        public required List<IExerciseComponent> ExerciseComponents { get; set; }
     }
 }
