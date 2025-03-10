@@ -1,16 +1,19 @@
 ﻿{
     "Routes": [
         {
-            "DownstreamPathTemplate": "/api/exercises",
+            "DownstreamPathTemplate": "/api/exercises/components",
             "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
                     "Host": "localhost",
-                    "Port": "5002"
+                    "Port": 5001
                 }
             ],
-            "UpstreamPathTemplate": "/exercises",
-            "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ]
+            "UpstreamPathTemplate": "/components",
+            "UpstreamHttpMethod": [ "POST" ]
         }
-    ]
+    ],
+    "GlobalConfiguration": {
+        "BaseUrl": "http://localhost:5000"
+    }
 }
