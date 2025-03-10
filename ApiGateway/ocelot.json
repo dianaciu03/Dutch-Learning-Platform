@@ -1,0 +1,16 @@
+﻿{
+    "Routes": [
+        {
+            "DownstreamPathTemplate": "/api/exercises",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": "5002"
+                }
+            ],
+            "UpstreamPathTemplate": "/exercises",
+            "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ]
+        }
+    ]
+}

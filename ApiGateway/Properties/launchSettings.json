@@ -2,36 +2,39 @@
     "profiles": {
         "http": {
             "commandName": "Project",
-            "launchBrowser": false,
+            "launchBrowser": true,
+            "launchUrl": "swagger",
             "environmentVariables": {
                 "ASPNETCORE_ENVIRONMENT": "Development"
             },
             "dotnetRunMessages": true,
-            "applicationUrl": "http://localhost:5002"
+            "applicationUrl": "http://localhost:6000"
         },
         "https": {
             "commandName": "Project",
-            "launchBrowser": false,
+            "launchBrowser": true,
+            "launchUrl": "swagger",
             "environmentVariables": {
                 "ASPNETCORE_ENVIRONMENT": "Development"
             },
             "dotnetRunMessages": true,
-            "applicationUrl": "https://localhost:7002;http://localhost:5002"
+            "applicationUrl": "https://localhost:7000;http://localhost:6000"
         },
         "IIS Express": {
             "commandName": "IISExpress",
-            "launchBrowser": false,
+            "launchBrowser": true,
+            "launchUrl": "swagger",
             "environmentVariables": {
                 "ASPNETCORE_ENVIRONMENT": "Development"
             }
         },
         "Container (Dockerfile)": {
             "commandName": "Docker",
-            "launchBrowser": false,
+            "launchBrowser": true,
             "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/swagger",
             "environmentVariables": {
-                "ASPNETCORE_HTTPS_PORTS": "8084",
-                "ASPNETCORE_HTTP_PORTS": "8085"
+                "ASPNETCORE_HTTPS_PORTS": "8082",
+                "ASPNETCORE_HTTP_PORTS": "8083"
             },
             "publishAllPorts": true,
             "useSSL": true
@@ -42,8 +45,8 @@
         "windowsAuthentication": false,
         "anonymousAuthentication": true,
         "iisExpress": {
-            "applicationUrl": "http://localhost:25632",
-            "sslPort": 44368
+            "applicationUrl": "http://localhost:25631",
+            "sslPort": 44367
         }
     }
 }

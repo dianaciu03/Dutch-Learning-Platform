@@ -1,10 +1,7 @@
-﻿using ContentService.Interfaces;
-using ContentService.Managers;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
-namespace ContentService
+using Ocelot.DependencyInjection;
+
+namespace ApiGateway
 {
     public class Program
     {
@@ -13,10 +10,12 @@ namespace ContentService
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+
             builder.Services.AddControllers();
+            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddScoped<IExerciseManager, ExerciseManager>();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddOcelot(); 
 
             var app = builder.Build();
 
@@ -24,12 +23,13 @@ namespace ContentService
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Gateway v1"));
             }
 
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
+
 
             app.MapControllers();
 
