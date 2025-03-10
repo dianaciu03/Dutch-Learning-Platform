@@ -33,17 +33,6 @@ namespace ContentService.Managers
             }
         }
 
-        // Read
-        public Exercise GetExerciseById(int id)
-        {
-            return _exercises.FirstOrDefault(e => e.Id == id);
-        }
-
-        public List<Exercise> GetAllExercises()
-        {
-            return _exercises;
-        }
-
         public ComponentResponse CreateExerciseComponent(CreateExerciseComponentRequest request)
         {
             ExerciseType type = EnumConverter.ParseExerciseType(request.ComponentType);
@@ -62,31 +51,52 @@ namespace ContentService.Managers
             return new ComponentResponse { Component = component };
         }
 
-        // Update
-        public bool UpdateExercise(int id, List<ExerciseType> types, CEFRLevel level, IEnumerable<IExerciseComponent> exerciseComponents)
+        // Read
+        public ExerciseResponse GetExerciseById(int id)
         {
-            var exercise = GetExerciseById(id);
-            if (exercise == null)
-            {
-                return false;
-            }
+            var exercise = _exercises.FirstOrDefault(e => e.Id == id);
 
-            // Assuming Exercise has methods to update its properties
-            exercise = new Exercise(types, level, exerciseComponents);
-            return true;
+            return new ExerciseResponse
+            {
+                ExerciseList = new List<Exercise> { exercise }
+            };
         }
 
-        // Delete
-        public bool DeleteExercise(int id)
+        public ExerciseResponse GetAllExercises()
         {
-            var exercise = GetExerciseById(id);
-            if (exercise == null)
+            return new ExerciseResponse
             {
-                return false;
-            }
-
-            _exercises.Remove(exercise);
-            return true;
+                ExerciseList = _exercises.ToList()
+            };
         }
+
+
+
+        //// Update
+        //public bool UpdateExercise(int id, List<ExerciseType> types, CEFRLevel level, IEnumerable<IExerciseComponent> exerciseComponents)
+        //{
+        //    var exercise = GetExerciseById(id);
+        //    if (exercise == null)
+        //    {
+        //        return false;
+        //    }
+
+        //    // Assuming Exercise has methods to update its properties
+        //    exercise = new Exercise(types, level, exerciseComponents);
+        //    return true;
+        //}
+
+        //// Delete
+        //public bool DeleteExercise(int id)
+        //{
+        //    var exercise = GetExerciseById(id);
+        //    if (exercise == null)
+        //    {
+        //        return false;
+        //    }
+
+        //    _exercises.Remove(exercise);
+        //    return true;
+        //}
     }
 }

@@ -48,24 +48,17 @@ namespace ContentService.Controllers
             return Ok(createdComponent);
         }
 
-        //// Read
-        //[HttpGet("{id}")]
-        //public IActionResult GetExerciseById(int id)
-        //{
-        //    var exercise = _exerciseManager.GetExerciseById(id);
-        //    if (exercise == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    return Ok(exercise);
-        //}
+        // Read
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+            => Ok(await Task.Run(() => _exerciseManager.GetAllExercises()));
 
-        //[HttpGet]
-        //public IActionResult GetAllExercises()
-        //{
-        //    var exercises = _exerciseManager.GetAllExercises();
-        //    return Ok(exercises);
-        //}
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var exerciseResponse = await Task.Run(() => _exerciseManager.GetExerciseById(id));
+            return exerciseResponse == null ? NotFound() : Ok(exerciseResponse);
+        }
 
         //// Update
         //[HttpPut("{id}")]

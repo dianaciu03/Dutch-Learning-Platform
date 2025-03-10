@@ -12,9 +12,9 @@ namespace ContentService.Interfaces
     {
         bool CreateExercise(CreateExerciseRequest request);
         ComponentResponse CreateExerciseComponent(CreateExerciseComponentRequest request);
-        Exercise GetExerciseById(int id);
-        List<Exercise> GetAllExercises();
-        bool UpdateExercise(int id, List<ExerciseType> types, CEFRLevel level, IEnumerable<IExerciseComponent> exerciseComponents);
-        bool DeleteExercise(int id);
+        ExerciseResponse GetExerciseById(int id);
+        ExerciseResponse GetAllExercises();
+        //bool UpdateExercise(int id, List<ExerciseType> types, CEFRLevel level, IEnumerable<IExerciseComponent> exerciseComponents);
+        //bool DeleteExercise(int id);
     }
 }
