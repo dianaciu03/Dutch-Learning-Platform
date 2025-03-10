@@ -10,29 +10,31 @@ namespace ContentService.ExerciseComponents
     public class ReadingComponent: IExerciseComponent
     {
         public const string INSTRUCTION = "Read the following text and answer the questions below.";
-        public static string Instruction => INSTRUCTION;
-        public string givenText { get; private set; }
-        public List<string> questions { get; private set; }
+        public string Instruction { get; private set; }
+        public string GivenText { get; private set; }
+        public List<string> Questions { get; private set; }
 
         public ReadingComponent() 
-        { 
+        {
+            Instruction = INSTRUCTION;
         }
 
         public ReadingComponent(string givenText, List<string> questions)
         {
-            this.givenText = givenText;
-            this.questions = questions;
+            Instruction = INSTRUCTION;
+            this.GivenText = givenText;
+            this.Questions = questions;
         }
 
         public void Display()
         {
             Console.WriteLine("\n~ Reading Section ~");
             Console.WriteLine($"\n {INSTRUCTION}");
-            Console.WriteLine($"\n {givenText}");
+            Console.WriteLine($"\n {GivenText}");
             Console.WriteLine("\nQuestions:");
-            for (int i = 0; i < questions.Count; i++)
+            for (int i = 0; i < Questions.Count; i++)
             {
-                Console.WriteLine($"\n{i + 1}. {questions[i]}");
+                Console.WriteLine($"\n{i + 1}. {Questions[i]}");
             }
         }
     }

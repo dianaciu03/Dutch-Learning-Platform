@@ -10,19 +10,22 @@ namespace ContentService.ExerciseComponents
     public class VocabularyComponent : IExerciseComponent
     {
         public const string INSTRUCTION = "Write down the correct translation of the given words.";
-        public int nrOfWordPairs { get; private set; }
+        public string Instruction { get; private set; }
+        public int NrOfWordPairs { get; private set; }
         public (string DutchWord, string EnglishWord)[] WordPairs { get; private set; }
 
         public VocabularyComponent()
         {
+            Instruction = INSTRUCTION;
         }
 
         public VocabularyComponent(int numberOfWordPairs, List<(string, string)> wordPairs)
         {
-            nrOfWordPairs = numberOfWordPairs;
-            WordPairs = new (string, string)[nrOfWordPairs];
+            Instruction = INSTRUCTION;
+            NrOfWordPairs = numberOfWordPairs;
+            WordPairs = new (string, string)[NrOfWordPairs];
 
-            for (int i = 0; i < nrOfWordPairs && i < wordPairs.Count; i++)
+            for (int i = 0; i < NrOfWordPairs && i < wordPairs.Count; i++)
             {
                 WordPairs[i] = wordPairs[i];
             }

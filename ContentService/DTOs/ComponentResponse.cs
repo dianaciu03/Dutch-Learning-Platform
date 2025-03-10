@@ -9,6 +9,6 @@ namespace ContentService.DTOs
 {
     public class ComponentResponse
     {
-        public IExerciseComponent Component { get; set; }
+        public object Component { get; set; }
     }
 }
