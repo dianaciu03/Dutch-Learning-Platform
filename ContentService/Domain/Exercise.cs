@@ -10,18 +10,19 @@ namespace ContentService.Domain
     public class Exercise
     {
         public int Id { get; private set; }
+        public int TeacherId { get; private set; }
         public List<ExerciseType> ExerciseTypes { get; private set; }
         public CEFRLevel Level { get; private set; } 
-        public double Grade { get; private set; } 
+        public int MaxPoints { get; private set; } 
 
         private readonly IEnumerable<IExerciseComponent> _exerciseComponents;
 
-        public Exercise(List<ExerciseType> types, CEFRLevel level, IEnumerable<IExerciseComponent> exerciseComponents)
+        public Exercise(List<ExerciseType> types, CEFRLevel level, int maxPoints, IEnumerable<IExerciseComponent> exerciseComponents)
         {
-            this.ExerciseTypes = types;
-            this.Level = level;
-            this.Grade = 0.0;
-            this._exerciseComponents = exerciseComponents;
+            ExerciseTypes = types;
+            Level = level;
+            MaxPoints = maxPoints;
+            _exerciseComponents = exerciseComponents;
         }
 
         public void DisplayExercise()

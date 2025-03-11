@@ -12,6 +12,7 @@ namespace ContentService.DTOs
     {
         public required List<string> ExerciseTypes { get; set; }
         public required string Level { get; set; }
+        public required int MaxPoints { get; set; }
         public required List<IExerciseComponent> ExerciseComponents { get; set; }
     }
 }

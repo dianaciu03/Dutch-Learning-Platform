@@ -5,16 +5,16 @@ using System.Text;
 using System.Threading.Tasks;
 using ContentService.Interfaces;
 
-namespace ContentService.ExerciseComponents
+namespace ContentService.Domain.ExerciseComponents
 {
-    public class ReadingComponent: IExerciseComponent
+    public class ReadingComponent : IExerciseComponent
     {
         public const string INSTRUCTION = "Read the following text and answer the questions below.";
         public string Instruction { get; private set; }
         public string GivenText { get; private set; }
         public List<string> Questions { get; private set; }
 
-        public ReadingComponent() 
+        public ReadingComponent()
         {
             Instruction = INSTRUCTION;
         }
@@ -22,8 +22,8 @@ namespace ContentService.ExerciseComponents
         public ReadingComponent(string givenText, List<string> questions)
         {
             Instruction = INSTRUCTION;
-            this.GivenText = givenText;
-            this.Questions = questions;
+            GivenText = givenText;
+            Questions = questions;
         }
 
         public void Display()

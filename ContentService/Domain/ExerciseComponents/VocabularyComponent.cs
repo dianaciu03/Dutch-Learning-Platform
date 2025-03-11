@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ContentService.Interfaces;
 
-namespace ContentService.ExerciseComponents
+namespace ContentService.Domain.ExerciseComponents
 {
     public class VocabularyComponent : IExerciseComponent
     {

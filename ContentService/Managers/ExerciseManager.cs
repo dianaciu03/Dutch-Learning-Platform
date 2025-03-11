@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ContentService.Domain;
 using ContentService.DTOs;
-using ContentService.ExerciseComponents;
+using ContentService.Domain.ExerciseComponents;
 using ContentService.Helpers;
 using ContentService.Interfaces;
 
@@ -22,7 +22,7 @@ namespace ContentService.Managers
             {
                 var exerciseTypes = request.ExerciseTypes.Select(type => EnumConverter.ParseExerciseType(type)).ToList();
                 var level = EnumConverter.ParseCEFRLevel(request.Level);
-                var exercise = new Exercise(exerciseTypes, level, request.ExerciseComponents);
+                var exercise = new Exercise(exerciseTypes, level, request.MaxPoints, request.ExerciseComponents);
                 _exercises.Add(exercise);
                 return true;
             }
