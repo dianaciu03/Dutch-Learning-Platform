@@ -5,16 +5,17 @@ using System.Text;
 using System.Threading.Tasks;
 using ContentService.Interfaces;
 
-namespace ContentService.Domain.ExerciseComponents
+namespace ContentService.Domain.ExamComponents
 {
-    public class ListeningComponent : IExerciseComponent
+    public class WritingComponent : IExamComponent
     {
-        public ListeningComponent()
+        public WritingComponent()
         {
         }
+
         public void Display()
         {
-            Console.WriteLine("Listening Component");
+            Console.WriteLine("Writing Component");
         }
     }
 }

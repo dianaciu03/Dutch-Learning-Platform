@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ContentService.Domain;
 
 namespace ContentService.DTOs
 {
-    public class CreateExerciseComponentRequest
+    public class ExamResponse
     {
-        public required string ComponentType { get; set; }
+        public List<ExamPractice>? ExamList { get; set; }
     }
 }

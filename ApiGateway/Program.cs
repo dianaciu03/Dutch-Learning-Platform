@@ -13,11 +13,20 @@ namespace ApiGateway
             // Add services to the container.
 
             builder.Services.AddControllers();
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddOcelot();
             builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
+
+            // Load additional Ocelot JSON files dynamically from "ocelot-configs" folder
+            var configFiles = Directory.GetFiles("ocelot-configs", "*.json", SearchOption.AllDirectories);
+            foreach (var file in configFiles)
+            {
+                builder.Configuration.AddJsonFile(file, optional: false, reloadOnChange: true);
+            }
+
             builder.Logging.AddConsole();
 
             var app = builder.Build();

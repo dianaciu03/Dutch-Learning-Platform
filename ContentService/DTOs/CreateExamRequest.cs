@@ -8,11 +8,11 @@ using ContentService.Interfaces;
 
 namespace ContentService.DTOs
 {
-    public class CreateExerciseRequest
+    public class CreateExamRequest
     {
-        public required List<string> ExerciseTypes { get; set; }
+        public required List<string> ExamTypes { get; set; }
         public required string Level { get; set; }
         public required int MaxPoints { get; set; }
-        public required List<IExerciseComponent> ExerciseComponents { get; set; }
+        public required List<IExamComponent> ExamComponents { get; set; }
     }
 }

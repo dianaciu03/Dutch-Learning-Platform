@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ContentService.Interfaces
+namespace ContentService.DTOs
 {
-    public interface IExerciseComponent
+    public class CreateExamComponentRequest
     {
-        void Display();
+        public required string ComponentType { get; set; }
     }
 }

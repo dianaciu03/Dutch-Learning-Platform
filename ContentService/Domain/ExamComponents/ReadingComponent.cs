@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using ContentService.Interfaces;
 
-namespace ContentService.Domain.ExerciseComponents
+namespace ContentService.Domain.ExamComponents
 {
-    public class ReadingComponent : IExerciseComponent
+    public class ReadingComponent : IExamComponent
     {
         public const string INSTRUCTION = "Read the following text and answer the questions below.";
         public string Instruction { get; private set; }

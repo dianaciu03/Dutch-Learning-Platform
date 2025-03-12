@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ContentService.Domain
 {
-    public enum ExerciseType
+    public enum ExamType
     {
         Grammar,
         Vocabulary,

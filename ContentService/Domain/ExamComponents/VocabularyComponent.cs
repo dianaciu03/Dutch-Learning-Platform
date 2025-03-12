@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using ContentService.Interfaces;
 
-namespace ContentService.Domain.ExerciseComponents
+namespace ContentService.Domain.ExamComponents
 {
-    public class VocabularyComponent : IExerciseComponent
+    public class VocabularyComponent : IExamComponent
     {
         public const string INSTRUCTION = "Write down the correct translation of the given words.";
         public string Instruction { get; private set; }

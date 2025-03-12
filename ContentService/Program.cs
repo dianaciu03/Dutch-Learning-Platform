@@ -15,7 +15,7 @@ namespace ContentService
             // Add services to the container.
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddScoped<IExerciseManager, ExerciseManager>();
+            builder.Services.AddScoped<IExamPracticeManager, ExamPracticeManager>();
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
