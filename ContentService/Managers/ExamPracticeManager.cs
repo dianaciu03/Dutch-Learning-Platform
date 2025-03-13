@@ -14,6 +14,12 @@ namespace ContentService.Managers
     public class ExamPracticeManager : IExamPracticeManager
     {
         private readonly List<ExamPractice> _exams = [];
+        private readonly LogHelper<ExamPractice> _logger;
+
+        public ExamPracticeManager(LogHelper<ExamPractice> logHelper)
+        {
+            _logger = logHelper;
+        }
 
         // Create
         public bool CreateExamPractice(CreateExamRequest request)
@@ -28,77 +34,108 @@ namespace ContentService.Managers
             }
             catch (Exception ex)
             {
-                // Log the exception
+                _logger.LogError("Error while processing exam.", ex);
                 return false;
             }
         }
 
         public ComponentResponse CreateExamComponent(CreateExamComponentRequest request)
         {
-            ExamType type = EnumConverter.ParseExamType(request.ComponentType);
-
-            IExamComponent component = type switch
+            try
             {
-                ExamType.Reading => new ReadingComponent(),
-                ExamType.Vocabulary => new VocabularyComponent(),
-                ExamType.Listening => new ListeningComponent(),
-                ExamType.Writing => new WritingComponent(),
-                ExamType.Speaking => new SpeakingComponent(),
-                ExamType.Grammar => new GrammarComponent(),
-                _ => throw new ArgumentException($"Unsupported exam type: {request.ComponentType}")
-            };
+                ExamType type = EnumConverter.ParseExamType(request.ComponentType);
 
-            return new ComponentResponse { Component = component };
+                IExamComponent component = type switch
+                {
+                    ExamType.Reading => new ReadingComponent(),
+                    ExamType.Vocabulary => new VocabularyComponent(),
+                    ExamType.Listening => new ListeningComponent(),
+                    ExamType.Writing => new WritingComponent(),
+                    ExamType.Speaking => new SpeakingComponent(),
+                    ExamType.Grammar => new GrammarComponent(),
+                    _ => throw new ArgumentException($"Unsupported exam type: {request.ComponentType}")
+                };
+
+                return new ComponentResponse { Component = component };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error while creating exam component.", ex);
+                return new ComponentResponse { Component = null };
+            }
+
+
         }
 
         // Read
         public ExamResponse GetExamPracticeById(int id)
         {
-            var exam = _exams.FirstOrDefault(e => e.Id == id);
-
-            return new ExamResponse
+            try
             {
-                ExamList = new List<ExamPractice> { exam }
-            };
+                var exam = _exams.FirstOrDefault(e => e.Id == id);
+                return new ExamResponse { ExamList = new List<ExamPractice> { exam } };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error while getting exam.", ex);
+                return new ExamResponse { ExamList = new List<ExamPractice>() };
+            }
+
         }
 
         public ExamResponse GetAllExamPractices()
         {
-            return new ExamResponse
+            try
             {
-                ExamList = _exams.ToList()
-            };
+                return new ExamResponse { ExamList = _exams };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error while getting all exams.", ex);
+                return new ExamResponse { ExamList = new List<ExamPractice>() };
+            }
         }
 
         // Update
         public bool UpdateExamPractice(UpdateExamRequest updateExam)
         {
-            var exam = _exams.FirstOrDefault(e => e.Id == updateExam.Id);
-
-            if (exam == null)
+            try
             {
+                var exam = _exams.FirstOrDefault(e => e.Id == updateExam.Id);
+                if (exam == null)
+                {
+                    return false;
+                }
+                exam.ExamTypes = updateExam.ExamTypes.Select(type => EnumConverter.ParseExamType(type)).ToList();
+                exam.Level = EnumConverter.ParseCEFRLevel(updateExam.Level);
+                exam.ExamComponents = updateExam.ExamComponents;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error while updating exam.", ex);
                 return false;
             }
-
-            exam.Level = EnumConverter.ParseCEFRLevel(updateExam.Level);
-            exam.ExamTypes = updateExam.ExamTypes.Select(type => EnumConverter.ParseExamType(type)).ToList();
-            exam.ExamComponents = updateExam.ExamComponents;
-
-            return true;
         }
 
         // Delete
         public bool DeleteExamPractice(int id)
         {
-            var exam = _exams.FirstOrDefault(e => e.Id == id);
-
-            if (exam == null)
+            try
             {
+                var exam = _exams.FirstOrDefault(e => e.Id == id);
+                if (exam == null)
+                {
+                    return false;
+                }
+                _exams.Remove(exam);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error while deleting exam.", ex);
                 return false;
             }
-
-            _exams.Remove(exam);
-            return true;
         }
     }
 }
