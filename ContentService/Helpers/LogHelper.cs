@@ -4,11 +4,22 @@ namespace ContentService.Helpers
 {
     public class LogHelper<T>
     {
-        private readonly ILogger<T> _logger;
+        private ILogger<T> _logger;
 
-        public LogHelper(ILogger<T> logger)
+        public LogHelper()
         {
-            _logger = logger;
+            InitializeLogger();
+        }
+
+        // Method to initialize the logger (can be called manually to reconfigure if needed)
+        private void InitializeLogger()
+        {
+            var loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder.AddConsole(); // You can add other providers or modify this configuration as needed
+            });
+
+            _logger = loggerFactory.CreateLogger<T>();
         }
 
         public void LogInfo(string message, params object[] args)

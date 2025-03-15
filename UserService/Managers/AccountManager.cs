@@ -7,13 +7,15 @@ namespace UserService.Managers
 {
     public class AccountManager : IAccountManager
     {
+        private readonly RabbitMQConnection _rabbitMqConnection;
         private readonly List<UserAccount> _accounts = new List<UserAccount>();
         private readonly LogHelper<AccountManager> _logger;
         //private readonly IAccountRepository _accountRepository;
 
-        public AccountManager(LogHelper<AccountManager> logger)
+        public AccountManager(string rabbitMqHost, string rabbitMqUser, string rabbitMqPassword)
         {
-            _logger = logger;
+            _rabbitMqConnection = new RabbitMQConnection(rabbitMqHost, rabbitMqUser, rabbitMqPassword);
+            _logger = new LogHelper<AccountManager>();
             //_accountRepository = accountRepository;
         }
 
@@ -75,6 +77,13 @@ namespace UserService.Managers
             {
                 _logger.LogInfo("Fetching account with ID: {0}", id);
                 var account = _accounts.FirstOrDefault(e => e.Id == id);
+
+                // Prepare a message that will be sent to RabbitMQ
+                var message = $"Account fetched: {id}";
+
+                // Assuming you have an instance of RabbitMQConnection, e.g. _rabbitMqConnection
+                _rabbitMqConnection.PublishMessage(message, "accountQueue");
+
                 return new AccountResponse { AccountList = new List<UserAccount> { account } };
             }
             catch (Exception ex)

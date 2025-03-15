@@ -1,8 +1,9 @@
 ﻿using System.Text;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
+using UserService.Managers;
 
-namespace ContentService.Helpers
+namespace UserService.Helpers
 {
     public class RabbitMQConnection : IDisposable
     {
