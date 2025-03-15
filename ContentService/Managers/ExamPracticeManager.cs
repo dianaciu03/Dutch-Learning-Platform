@@ -72,12 +72,13 @@ namespace ContentService.Managers
         {
             try
             {
+                _logger.LogInfo("Fetching exam with ID: {0}", id);
                 var exam = _exams.FirstOrDefault(e => e.Id == id);
                 return new ExamResponse { ExamList = new List<ExamPractice> { exam } };
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error while getting exam.", ex);
+                _logger.LogError("Error while fetching exam.", ex);
                 return new ExamResponse { ExamList = new List<ExamPractice>() };
             }
 
@@ -126,6 +127,7 @@ namespace ContentService.Managers
                 var exam = _exams.FirstOrDefault(e => e.Id == id);
                 if (exam == null)
                 {
+                    _logger.LogWarning("Exam could not be found.");
                     return false;
                 }
                 _exams.Remove(exam);

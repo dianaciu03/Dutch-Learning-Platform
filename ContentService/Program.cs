@@ -1,4 +1,5 @@
 
+using ContentService.Helpers;
 using ContentService.Interfaces;
 using ContentService.Managers;
 
@@ -10,8 +11,6 @@ namespace ContentService
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -19,6 +18,7 @@ namespace ContentService
             builder.Services.AddLogging();
 
             // Add services to the container
+            builder.Services.AddScoped(typeof(LogHelper<>));
             builder.Services.AddScoped<IExamPracticeManager, ExamPracticeManager>();
 
             var app = builder.Build();

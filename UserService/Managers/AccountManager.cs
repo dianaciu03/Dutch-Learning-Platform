@@ -5,16 +5,16 @@ using UserService.Interfaces;
 
 namespace UserService.Managers
 {
-    public class AccountManager
+    public class AccountManager : IAccountManager
     {
         private readonly List<UserAccount> _accounts = new List<UserAccount>();
         private readonly LogHelper<AccountManager> _logger;
-        private readonly IAccountRepository _accountRepository;
+        //private readonly IAccountRepository _accountRepository;
 
-        public AccountManager(LogHelper<AccountManager> logger, IAccountRepository accountRepository)
+        public AccountManager(LogHelper<AccountManager> logger)
         {
             _logger = logger;
-            _accountRepository = accountRepository;
+            //_accountRepository = accountRepository;
         }
 
         // Create Teacher Account
@@ -64,6 +64,58 @@ namespace UserService.Managers
             catch (Exception ex)
             {
                 _logger.LogError("Error creating student account", ex);
+                return false;
+            }
+        }
+
+        // Get Account By ID
+        public AccountResponse GetAccountById(int id)
+        {
+            try
+            {
+                _logger.LogInfo("Fetching account with ID: {0}", id);
+                var account = _accounts.FirstOrDefault(e => e.Id == id);
+                return new AccountResponse { AccountList = new List<UserAccount> { account } };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error while fetching account.", ex);
+                return new AccountResponse { AccountList = new List<UserAccount>() };
+            }
+        }
+
+        // Get All Accounts
+        public AccountResponse GetAllAccounts()
+        {
+            try
+            {
+                return new AccountResponse { AccountList = _accounts };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error while getting all accounts.", ex);
+                return new AccountResponse { AccountList = new List<UserAccount>() };
+            }
+        }
+
+
+        // Delete Account
+        public bool DeleteAccount(int id)
+        {
+            try
+            {
+                var account = _accounts.FirstOrDefault(e => e.Id == id);
+                if (account == null)
+                {
+                    _logger.LogWarning("Account could not be found.");
+                    return false;
+                }
+                _accounts.Remove(account);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error while deleting exam.", ex);
                 return false;
             }
         }
