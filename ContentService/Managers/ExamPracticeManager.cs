@@ -8,6 +8,8 @@ using ContentService.DTOs;
 using ContentService.Domain.ExamComponents;
 using ContentService.Helpers;
 using ContentService.Interfaces;
+using RabbitMQ.Client.Events;
+using RabbitMQ.Client;
 
 namespace ContentService.Managers
 {
@@ -17,9 +19,9 @@ namespace ContentService.Managers
         private readonly List<ExamPractice> _exams = [];
         private readonly LogHelper<ExamPracticeManager> _logger;
 
-        public ExamPracticeManager(string rabbitMqHost, string rabbitMqUser, string rabbitMqPassword)
+        public ExamPracticeManager(RabbitMQConnection rabbitMqConnection)
         {
-            _rabbitMqConnection = new RabbitMQConnection(rabbitMqHost, rabbitMqUser, rabbitMqPassword);
+            _rabbitMqConnection = rabbitMqConnection;
             _logger = new LogHelper<ExamPracticeManager>();
         }
 
@@ -140,6 +142,51 @@ namespace ContentService.Managers
                 _logger.LogError("Error while deleting exam.", ex);
                 return false;
             }
+        }
+
+        public async Task StartListeningAsync()
+        {
+            var channel = _rabbitMqConnection.GetChannel();
+
+            // Declare the queue you want to listen to
+            await channel.QueueDeclareAsync(queue: "accountQueue", durable: false, exclusive: false, autoDelete: false, arguments: null);
+
+            // Create a consumer
+            var consumer = new AsyncEventingBasicConsumer(channel);
+            consumer.ReceivedAsync += async (model, ea) =>
+            {
+                var body = ea.Body.ToArray();
+                var message = Encoding.UTF8.GetString(body);
+
+                // Extract account id from the message
+                var accountId = ExtractAccountId(message);
+
+                if (accountId.HasValue)
+                {
+                    // Fetch the user data (e.g., GetAllExamsByUserId)
+                    //var content = await _accountRepository.GetAllExamsByUserId(accountId.Value);
+                    _logger.LogInfo("Received the message and it contains the id: {0}", accountId);
+                }
+            };
+
+            // Start listening to the queue
+            await channel.BasicConsumeAsync(queue: "accountQueue", autoAck: true, consumer: consumer);
+
+            _logger.LogInfo("Content service is listening for messages...");
+        }
+
+        private int? ExtractAccountId(string message)
+        {
+            // Assuming the message is something like: "Account fetched: {id}"
+            if (message.StartsWith("Account fetched:"))
+            {
+                var parts = message.Split(':');
+                if (parts.Length > 1 && int.TryParse(parts[1].Trim(), out int id))
+                {
+                    return id;
+                }
+            }
+            return null;
         }
     }
 }

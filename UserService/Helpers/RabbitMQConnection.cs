@@ -14,13 +14,17 @@ namespace UserService.Helpers
 
         public RabbitMQConnection(string hostName, string userName, string password)
         {
+            _logger = new LogHelper<RabbitMQConnection>();
+            _logger.LogInfo("Data is fetched from the env file: {0}, {1}, {2}", hostName, userName, password);
             _factory = new ConnectionFactory
             {
                 HostName = hostName,
                 UserName = userName,
                 Password = password
             };
-            _logger = new LogHelper<RabbitMQConnection>();
+
+            // Ensure connection is established when the class is instantiated
+            Task.Run(async () => await ConnectAsync()).GetAwaiter().GetResult();
         }
 
         public async Task ConnectAsync()

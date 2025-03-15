@@ -12,9 +12,9 @@ namespace UserService.Managers
         private readonly LogHelper<AccountManager> _logger;
         //private readonly IAccountRepository _accountRepository;
 
-        public AccountManager(string rabbitMqHost, string rabbitMqUser, string rabbitMqPassword)
+        public AccountManager(RabbitMQConnection rabbitMqConnection)
         {
-            _rabbitMqConnection = new RabbitMQConnection(rabbitMqHost, rabbitMqUser, rabbitMqPassword);
+            _rabbitMqConnection = rabbitMqConnection;
             _logger = new LogHelper<AccountManager>();
             //_accountRepository = accountRepository;
         }
