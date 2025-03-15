@@ -13,13 +13,16 @@ namespace ContentService.Helpers
 
         public RabbitMQConnection(string hostName, string userName, string password)
         {
+            _logger = new LogHelper<RabbitMQConnection>();
             _factory = new ConnectionFactory
             {
                 HostName = hostName,
                 UserName = userName,
                 Password = password
             };
-            _logger = new LogHelper<RabbitMQConnection>();
+
+            // Ensure connection is established when the class is instantiated
+            Task.Run(async () => await ConnectAsync()).GetAwaiter().GetResult();
         }
 
         public async Task ConnectAsync()

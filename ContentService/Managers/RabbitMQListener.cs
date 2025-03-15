@@ -7,13 +7,13 @@ namespace ContentService.Managers
     {
         private readonly LogHelper<RabbitMQListener> _logger;
         private readonly IServiceScopeFactory _scopeFactory;
-        private readonly RabbitMQConnection _rabbitMqConnection;
+        //private readonly RabbitMQConnection _rabbitMqConnection;
 
-        public RabbitMQListener(IServiceScopeFactory scopeFactory, RabbitMQConnection rabbitMQConnection)
+        public RabbitMQListener(IServiceScopeFactory scopeFactory)
         {
             _scopeFactory = scopeFactory;
             _logger = new LogHelper<RabbitMQListener>();
-            _rabbitMqConnection = rabbitMQConnection;
+            //_rabbitMqConnection = rabbitMQConnection;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
