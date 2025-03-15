@@ -13,12 +13,14 @@ namespace ContentService.Managers
 {
     public class ExamPracticeManager : IExamPracticeManager
     {
+        private readonly RabbitMQConnection _rabbitMqConnection;
         private readonly List<ExamPractice> _exams = [];
-        private readonly LogHelper<ExamPractice> _logger;
+        private readonly LogHelper<ExamPracticeManager> _logger;
 
-        public ExamPracticeManager(LogHelper<ExamPractice> logHelper)
+        public ExamPracticeManager(string rabbitMqHost, string rabbitMqUser, string rabbitMqPassword)
         {
-            _logger = logHelper;
+            _rabbitMqConnection = new RabbitMQConnection(rabbitMqHost, rabbitMqUser, rabbitMqPassword);
+            _logger = new LogHelper<ExamPracticeManager>();
         }
 
         // Create
