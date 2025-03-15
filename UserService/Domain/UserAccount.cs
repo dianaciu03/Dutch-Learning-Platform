@@ -1,6 +1,6 @@
 ﻿namespace UserService.Domain
 {
-    public abstract class User
+    public abstract class UserAccount
     {
         public int Id { get; set; }
         public string FirstName { get; set; }
@@ -8,7 +8,7 @@
         public string Username { get; set; }
         public string Token { get; set; }
 
-        protected User(int id, string firstName, string lastName, string username)
+        protected UserAccount(int id, string firstName, string lastName, string username)
         {
             Id = id;
             FirstName = firstName;
@@ -16,7 +16,14 @@
             Username = username;
         }
 
-        protected User()
+        protected UserAccount(string firstName, string lastName, string username)
+        {
+            FirstName = firstName;
+            LastName = lastName;
+            Username = username;
+        }
+
+        protected UserAccount()
         {
 
         }
