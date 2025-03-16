@@ -8,12 +8,22 @@ using ContentService.DTOs;
 using ContentService.Domain.ExamComponents;
 using ContentService.Helpers;
 using ContentService.Interfaces;
+using RabbitMQ.Client.Events;
+using RabbitMQ.Client;
 
 namespace ContentService.Managers
 {
     public class ExamPracticeManager : IExamPracticeManager
     {
+        private readonly RabbitMQConnection _rabbitMqConnection;
         private readonly List<ExamPractice> _exams = [];
+        private readonly LogHelper<ExamPracticeManager> _logger;
+
+        public ExamPracticeManager(RabbitMQConnection rabbitMqConnection)
+        {
+            _rabbitMqConnection = rabbitMqConnection;
+            _logger = new LogHelper<ExamPracticeManager>();
+        }
 
         // Create
         public bool CreateExamPractice(CreateExamRequest request)
@@ -28,77 +38,155 @@ namespace ContentService.Managers
             }
             catch (Exception ex)
             {
-                // Log the exception
+                _logger.LogError("Error while processing exam.", ex);
                 return false;
             }
         }
 
         public ComponentResponse CreateExamComponent(CreateExamComponentRequest request)
         {
-            ExamType type = EnumConverter.ParseExamType(request.ComponentType);
-
-            IExamComponent component = type switch
+            try
             {
-                ExamType.Reading => new ReadingComponent(),
-                ExamType.Vocabulary => new VocabularyComponent(),
-                ExamType.Listening => new ListeningComponent(),
-                ExamType.Writing => new WritingComponent(),
-                ExamType.Speaking => new SpeakingComponent(),
-                ExamType.Grammar => new GrammarComponent(),
-                _ => throw new ArgumentException($"Unsupported exam type: {request.ComponentType}")
-            };
+                ExamType type = EnumConverter.ParseExamType(request.ComponentType);
 
-            return new ComponentResponse { Component = component };
+                IExamComponent component = type switch
+                {
+                    ExamType.Reading => new ReadingComponent(),
+                    ExamType.Vocabulary => new VocabularyComponent(),
+                    ExamType.Listening => new ListeningComponent(),
+                    ExamType.Writing => new WritingComponent(),
+                    ExamType.Speaking => new SpeakingComponent(),
+                    ExamType.Grammar => new GrammarComponent(),
+                    _ => throw new ArgumentException($"Unsupported exam type: {request.ComponentType}")
+                };
+
+                return new ComponentResponse { Component = component };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error while creating exam component.", ex);
+                return new ComponentResponse { Component = null };
+            }
+
+
         }
 
         // Read
         public ExamResponse GetExamPracticeById(int id)
         {
-            var exam = _exams.FirstOrDefault(e => e.Id == id);
-
-            return new ExamResponse
+            try
             {
-                ExamList = new List<ExamPractice> { exam }
-            };
+                _logger.LogInfo("Fetching exam with ID: {0}", id);
+                var exam = _exams.FirstOrDefault(e => e.Id == id);
+                return new ExamResponse { ExamList = new List<ExamPractice> { exam } };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error while fetching exam.", ex);
+                return new ExamResponse { ExamList = new List<ExamPractice>() };
+            }
+
         }
 
         public ExamResponse GetAllExamPractices()
         {
-            return new ExamResponse
+            try
             {
-                ExamList = _exams.ToList()
-            };
+                return new ExamResponse { ExamList = _exams };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error while getting all exams.", ex);
+                return new ExamResponse { ExamList = new List<ExamPractice>() };
+            }
         }
 
         // Update
         public bool UpdateExamPractice(UpdateExamRequest updateExam)
         {
-            var exam = _exams.FirstOrDefault(e => e.Id == updateExam.Id);
-
-            if (exam == null)
+            try
             {
+                var exam = _exams.FirstOrDefault(e => e.Id == updateExam.Id);
+                if (exam == null)
+                {
+                    return false;
+                }
+                exam.ExamTypes = updateExam.ExamTypes.Select(type => EnumConverter.ParseExamType(type)).ToList();
+                exam.Level = EnumConverter.ParseCEFRLevel(updateExam.Level);
+                exam.ExamComponents = updateExam.ExamComponents;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error while updating exam.", ex);
                 return false;
             }
-
-            exam.Level = EnumConverter.ParseCEFRLevel(updateExam.Level);
-            exam.ExamTypes = updateExam.ExamTypes.Select(type => EnumConverter.ParseExamType(type)).ToList();
-            exam.ExamComponents = updateExam.ExamComponents;
-
-            return true;
         }
 
         // Delete
         public bool DeleteExamPractice(int id)
         {
-            var exam = _exams.FirstOrDefault(e => e.Id == id);
-
-            if (exam == null)
+            try
             {
+                var exam = _exams.FirstOrDefault(e => e.Id == id);
+                if (exam == null)
+                {
+                    _logger.LogWarning("Exam could not be found.");
+                    return false;
+                }
+                _exams.Remove(exam);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error while deleting exam.", ex);
                 return false;
             }
+        }
 
-            _exams.Remove(exam);
-            return true;
+        public async Task StartListeningAsync()
+        {
+            var channel = _rabbitMqConnection.GetChannel();
+
+            // Declare the queue you want to listen to
+            await channel.QueueDeclareAsync(queue: "accountQueue", durable: true, exclusive: false, autoDelete: false);
+
+            // Create a consumer
+            var consumer = new AsyncEventingBasicConsumer(channel);
+            consumer.ReceivedAsync += async (model, ea) =>
+            {
+                var body = ea.Body.ToArray();
+                var message = Encoding.UTF8.GetString(body);
+
+                // Extract account id from the message
+                var accountId = ExtractAccountId(message);
+
+                if (accountId.HasValue)
+                {
+                    // Fetch the user data (e.g., GetAllExamsByUserId)
+                    //var content = await _accountRepository.GetAllExamsByUserId(accountId.Value);
+                    _logger.LogInfo("Received the message and it contains the id: {0}", accountId);
+                }
+            };
+
+            // Start listening to the queue
+            await channel.BasicConsumeAsync(queue: "accountQueue", autoAck: true, consumer: consumer);
+
+            _logger.LogInfo("Content service is listening for messages...");
+        }
+
+        private int? ExtractAccountId(string message)
+        {
+            // Assuming the message is something like: "Account fetched: {id}"
+            if (message.StartsWith("Account fetched:"))
+            {
+                var parts = message.Split(':');
+                if (parts.Length > 1 && int.TryParse(parts[1].Trim(), out int id))
+                {
+                    return id;
+                }
+            }
+            return null;
         }
     }
 }

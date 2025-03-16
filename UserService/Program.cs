@@ -1,10 +1,9 @@
-
-using ContentService.Helpers;
-using ContentService.Interfaces;
-using ContentService.Managers;
 using DotNetEnv;
+using UserService.Helpers;
+using UserService.Interfaces;
+using UserService.Managers;
 
-namespace ContentService
+namespace UserService
 {
     public class Program
     {
@@ -13,7 +12,7 @@ namespace ContentService
             var builder = WebApplication.CreateBuilder(args);
 
             var envFilePath = Path.Combine(Directory.GetCurrentDirectory(), "..", ".env");
-            Env.Load(envFilePath);
+            Env.Load(envFilePath); 
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -21,7 +20,7 @@ namespace ContentService
             builder.Services.AddSwaggerGen();
             builder.Services.AddLogging();
 
-            // Register RabbitMQConnection as a Singleton
+            // Register RabbitMQConnection as a Singleton (or Scoped if you prefer)
             builder.Services.AddSingleton<RabbitMQConnection>(sp =>
             {
                 var rabbitMqHost = Environment.GetEnvironmentVariable("RABBITMQ_HOST");
@@ -31,11 +30,9 @@ namespace ContentService
                 return new RabbitMQConnection(rabbitMqHost, rabbitMqUser, rabbitMqPassword);
             });
 
-            builder.Services.AddHostedService<RabbitMQListener>();
-
-            // Add services to the container
+            // Add services to the container.
             builder.Services.AddScoped(typeof(LogHelper<>));
-            builder.Services.AddScoped<IExamPracticeManager, ExamPracticeManager>();
+            builder.Services.AddScoped<IAccountManager, AccountManager>();
 
             var app = builder.Build();
 
@@ -46,9 +43,10 @@ namespace ContentService
                 app.UseSwaggerUI();
             }
 
-            //app.UseHttpsRedirection();
+            app.UseHttpsRedirection();
 
             app.UseAuthorization();
+
 
             app.MapControllers();
 

@@ -5,12 +5,15 @@ VisualStudioVersion = 17.12.35707.178
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{391751FD-6F5C-444A-A597-AC7FBA696856}"
 	ProjectSection(SolutionItems) = preProject
+		.env = .env
 		docker-compose.yml = docker-compose.yml
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContentService", "ContentService\ContentService.csproj", "{8FA54328-10EC-4307-9D9E-0056366F5EAE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiGateway", "ApiGateway\ApiGateway.csproj", "{078F0974-CF46-454D-97A0-190409D007B0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService", "UserService\UserService.csproj", "{12B8A420-8570-4615-A8AA-610AD1AEE703}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,6 +29,10 @@ Global
 		{078F0974-CF46-454D-97A0-190409D007B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{078F0974-CF46-454D-97A0-190409D007B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{078F0974-CF46-454D-97A0-190409D007B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12B8A420-8570-4615-A8AA-610AD1AEE703}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12B8A420-8570-4615-A8AA-610AD1AEE703}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12B8A420-8570-4615-A8AA-610AD1AEE703}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12B8A420-8570-4615-A8AA-610AD1AEE703}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

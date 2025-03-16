@@ -16,5 +16,6 @@ namespace ContentService.Interfaces
         ExamResponse GetAllExamPractices();
         bool UpdateExamPractice(UpdateExamRequest request);
         bool DeleteExamPractice(int id);
+        Task StartListeningAsync();
     }
 }
