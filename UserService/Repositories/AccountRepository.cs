@@ -1,18 +1,19 @@
 ﻿using Microsoft.Azure.Cosmos;
 using UserService.Domain;
 using UserService.Helpers;
+using UserService.Interfaces;
 
 namespace UserService.Repositories
 {
-    public class AccountRepository
+    public class AccountRepository : IAccountRepository
     {
         private readonly Container _container;
 
         // Constructor to initialize the repository with a container
-        public AccountRepository(string databaseName, string containerName)
+        public AccountRepository(CosmosDBConnection cosmosDBConnection, string databaseName, string containerName)
         {
-            // Use CosmosDbConnection to get the container
-            _container = CosmosDBConnection.GetContainerAsync(databaseName, containerName).Result;
+            // Use CosmosDBConnection to get the container asynchronously
+            _container = cosmosDBConnection.GetContainerAsync(databaseName, containerName).Result;
         }
 
         // Method to save a user to Cosmos DB

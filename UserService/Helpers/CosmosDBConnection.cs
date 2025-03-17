@@ -4,33 +4,33 @@ namespace UserService.Helpers
 {
     public class CosmosDBConnection
     {
-        private static CosmosClient cosmosClient;
-        private static string connectionString;
-        private static readonly LogHelper<CosmosDBConnection> _logger;
+        private CosmosClient cosmosClient;
+        private readonly string _connectionString;
+        private readonly LogHelper<CosmosDBConnection> _logger;
 
-        // Static constructor to initialize the Cosmos client
-        static CosmosDBConnection()
+        public CosmosDBConnection(string connectionString)
         {
             _logger = new LogHelper<CosmosDBConnection>();
-
             // Get the connection string from environment variables
-            connectionString = Environment.GetEnvironmentVariable("COSMOSDB_CONNECTION_STRING");
+            _connectionString = connectionString;
 
-            if (string.IsNullOrEmpty(connectionString))
+            if (string.IsNullOrEmpty(_connectionString))
             {
                 throw new InvalidOperationException("Connection string is missing.");
             }
 
             // Initialize the Cosmos client
-            cosmosClient = new CosmosClient(connectionString);
+            cosmosClient = new CosmosClient(_connectionString);
+            _logger.LogInfo("CosmosDB Client instantiated successfully.");
         }
 
         // Method to get a Cosmos database (Create if not exists)
-        public static async Task<Database> GetDatabaseAsync(string databaseName)
+        public async Task<Database> GetDatabaseAsync(string databaseName)
         {
             // Check if the database exists; create it if not
             try
             {
+                //TODO: This method executes in a loop, check issues
                 Database database = await cosmosClient.CreateDatabaseIfNotExistsAsync(databaseName);
                 return database;
             }
@@ -42,7 +42,7 @@ namespace UserService.Helpers
         }
 
         // Method to get a Cosmos container (Create if not exists)
-        public static async Task<Container> GetContainerAsync(string databaseName, string containerName, string partitionKeyPath = "/id")
+        public async Task<Container> GetContainerAsync(string databaseName, string containerName, string partitionKeyPath = "/id")
         {
             try
             {

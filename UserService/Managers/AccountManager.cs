@@ -10,13 +10,13 @@ namespace UserService.Managers
         private readonly RabbitMQConnection _rabbitMqConnection;
         private readonly List<UserAccount> _accounts = new List<UserAccount>();
         private readonly LogHelper<AccountManager> _logger;
-        //private readonly IAccountRepository _accountRepository;
+        private readonly IAccountRepository _accountRepository;
 
-        public AccountManager(RabbitMQConnection rabbitMqConnection)
+        public AccountManager(RabbitMQConnection rabbitMqConnection, IAccountRepository accountRepository)
         {
             _rabbitMqConnection = rabbitMqConnection;
             _logger = new LogHelper<AccountManager>();
-            //_accountRepository = accountRepository;
+            _accountRepository = accountRepository;
         }
 
         // Create Teacher Account
@@ -35,6 +35,7 @@ namespace UserService.Managers
                 teacher.Password = request.Password;
 
                 _accounts.Add( teacher );
+                _accountRepository.SaveTeacherAccountAsync(teacher);
 
                 _logger.LogInfo("Created new teacher account: {0}", teacher.Username);
                 return true;
