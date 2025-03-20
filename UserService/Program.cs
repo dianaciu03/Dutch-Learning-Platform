@@ -45,6 +45,7 @@ namespace UserService
                 var rabbitMqHost = Environment.GetEnvironmentVariable("RABBITMQ_HOST");
                 var rabbitMqUser = Environment.GetEnvironmentVariable("RABBITMQ_USER");
                 var rabbitMqPassword = Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD");
+                
                 if (string.IsNullOrEmpty(rabbitMqHost) || string.IsNullOrEmpty(rabbitMqUser) || string.IsNullOrEmpty(rabbitMqPassword))
                 {
                     throw new InvalidOperationException("RabbitMQ connection details are not set.");
@@ -72,11 +73,12 @@ namespace UserService
                 app.UseSwaggerUI();
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
             app.UseAuthorization();
 
-
+            app.Urls.Add("http://0.0.0.0:8084");
+            //app.Urls.Add("https://0.0.0.0:8085");
             app.MapControllers();
 
             app.Run();

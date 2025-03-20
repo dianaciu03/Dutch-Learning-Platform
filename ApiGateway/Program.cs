@@ -17,16 +17,24 @@ namespace ApiGateway
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            //Add Ocelot configuration
+            ////Add Ocelot configuration
+            //builder.Configuration
+            //    .SetBasePath(Directory.GetCurrentDirectory()) // Ensure correct base path
+            //    .AddJsonFile("Properties/ocelot.json", optional: false, reloadOnChange: true);
+
             builder.Services.AddOcelot();
-            builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
+
+            builder.Configuration.AddJsonFile("Properties/ocelot.json", optional: false, reloadOnChange: true);
 
             // Load additional Ocelot JSON files dynamically from "ocelot-configs" folder
-            var configFiles = Directory.GetFiles("ocelot-configs", "*.json", SearchOption.AllDirectories);
-            foreach (var file in configFiles)
-            {
-                builder.Configuration.AddJsonFile(file, optional: false, reloadOnChange: true);
-            }
+            //var configFiles = Directory.GetFiles("ocelot-configs", "*.json", SearchOption.AllDirectories);
+            //foreach (var file in configFiles)
+            //{
+            //    builder.Configuration.AddJsonFile(file, optional: false, reloadOnChange: true);
+            //}
+
+            //string ocelotConfigFile = Environment.GetEnvironmentVariable("OCELOT__JSON__FILE") ?? "ocelot.json";
+
 
             builder.Logging.AddConsole();
 
@@ -39,9 +47,12 @@ namespace ApiGateway
                 app.UseSwaggerUI();
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
             app.UseAuthorization();
+
+            app.Urls.Add("http://0.0.0.0:8080");
+            //app.Urls.Add("https://0.0.0.0:8081");
 
             app.MapControllers();
 

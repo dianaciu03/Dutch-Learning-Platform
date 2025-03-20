@@ -35,7 +35,7 @@ namespace UserService.Managers
                 teacher.Password = request.Password;
 
                 _accounts.Add( teacher );
-                _accountRepository.SaveTeacherAccountAsync(teacher);
+                //_accountRepository.SaveTeacherAccountAsync(teacher);
 
                 _logger.LogInfo("Created new teacher account: {0}", teacher.Username);
                 return true;

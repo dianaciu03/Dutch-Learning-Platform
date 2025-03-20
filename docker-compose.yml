@@ -1,20 +1,113 @@
-version: '3'
 services:
+  user-service:
+    build:
+      context: .
+      dockerfile: UserService/Dockerfile
+    container_name: ss-user-service
+    ports:
+      - "8084:8084" # http
+      - "8085:8085" # https
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      cosmosdb-emulator:
+        condition: service_started
+    env_file:
+      - .env
+    networks:
+      - slimstudie-network
+    restart: always
+
+  content-service:
+    build:
+      context: .
+      dockerfile: ContentService/Dockerfile
+    container_name: ss-content-service
+    ports:
+      - "8082:8082" # http
+      - "8083:8083" # https
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      cosmosdb-emulator:
+        condition: service_started
+    env_file:
+      - .env
+    networks:
+      - slimstudie-network
+    restart: always
+
+  api-gateway:
+    build:
+      context: ./ApiGateway
+      dockerfile: Dockerfile
+    container_name: ss-api-gateway
+    ports:
+      - "8086:8086" # http
+      - "8087:8087" # https
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    networks:
+      - slimstudie-network
+    restart: always
+
   rabbitmq:
     image: rabbitmq:3-management
-    container_name: rabbitmq
-    hostname: rabbitmq
+    container_name: ss-rabbitmq
     ports:
-      - 5672:5672
-      - 15672:15672
+      - "5672:5672"  # AMQP port
+      - "15672:15672"  # Management UI port
     volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-    # networks:
-    #   - rabbitmq_network
+      - rabbitmq_data:/var/lib/rabbitmq  # Stores messages/queues
+    env_file:
+      - .env
+    networks:
+      - slimstudie-network
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: always
 
-# networks:
-#   rabbitmq_network:
-#     driver: bridge
+  cosmosdb-emulator:
+    image: mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator
+    container_name: ss-cosmosdb-emulator
+    ports:
+      - "8081:8081"  # Cosmos DB HTTP API port
+      - "10251:10251"  # Cosmos DB Gateway port
+      - "10252:10252" 
+      - "10253:10253"  
+      - "10254:10254" 
+    environment:
+      - AZURE_COSMOS_EMULATOR_PARTITION_COUNT=10
+      - AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE=true
+    env_file:
+      - .env
+    volumes:
+    - cosmosdb_data:/tmp/cosmos/appdata  # Persists data to the host
+    networks:
+      - slimstudie-network
+    healthcheck:
+      test: ["CMD", "curl", "-k", "https://localhost:8081/_explorer/index.html"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: always
+
+networks:
+  slimstudie-network:
+    driver: bridge
 
 volumes:
-  rabbitmq_data:
+  cosmosdb_data: # Named volume declaration
+    driver: local 
+  rabbitmq_data:  
+    driver: local 
+  rabbitmq_log: 
+    driver: local
+

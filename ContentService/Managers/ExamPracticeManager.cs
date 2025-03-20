@@ -172,7 +172,7 @@ namespace ContentService.Managers
             // Start listening to the queue
             await channel.BasicConsumeAsync(queue: "accountQueue", autoAck: true, consumer: consumer);
 
-            _logger.LogInfo("Content service is listening for messages...");
+            //_logger.LogInfo("Content service is listening for messages...");
         }
 
         private int? ExtractAccountId(string message)

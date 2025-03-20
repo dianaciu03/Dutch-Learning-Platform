@@ -19,8 +19,18 @@ namespace UserService.Helpers
                 throw new InvalidOperationException("Connection string is missing.");
             }
 
+            CosmosClientOptions options = new()
+            {
+                HttpClientFactory = () => new HttpClient(new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+                }),
+                ConnectionMode = ConnectionMode.Gateway,
+                LimitToEndpoint = true // Critical for emulator stability
+            };
+
             // Initialize the Cosmos client
-            cosmosClient = new CosmosClient(_connectionString);
+            cosmosClient = new CosmosClient(_connectionString, clientOptions: options);
             _logger.LogInfo("CosmosDB Client instantiated successfully.");
         }
 
@@ -30,7 +40,6 @@ namespace UserService.Helpers
             // Check if the database exists; create it if not
             try
             {
-                //TODO: This method executes in a loop, check issues
                 Database database = await cosmosClient.CreateDatabaseIfNotExistsAsync(databaseName);
                 return database;
             }
