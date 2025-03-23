@@ -51,6 +51,7 @@ services:
       - "8087:8087" # https
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - OCELOT_CONFIG_PATH=/app/Properties/ocelot.json
     networks:
       - slimstudie-network
     restart: always

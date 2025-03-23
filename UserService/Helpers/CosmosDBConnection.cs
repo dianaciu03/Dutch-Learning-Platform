@@ -41,6 +41,7 @@ namespace UserService.Helpers
             try
             {
                 Database database = await cosmosClient.CreateDatabaseIfNotExistsAsync(databaseName);
+                _logger.LogInfo("Created or retrieved database {0}", database);
                 return database;
             }
             catch (CosmosException ex)

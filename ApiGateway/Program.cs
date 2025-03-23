@@ -22,9 +22,10 @@ namespace ApiGateway
             //    .SetBasePath(Directory.GetCurrentDirectory()) // Ensure correct base path
             //    .AddJsonFile("Properties/ocelot.json", optional: false, reloadOnChange: true);
 
+            string configPath = Environment.GetEnvironmentVariable("OCELOT_CONFIG_PATH") ?? "Properties/ocelot.json";
+            builder.Configuration.AddJsonFile(configPath, optional: false, reloadOnChange: true);
             builder.Services.AddOcelot();
 
-            builder.Configuration.AddJsonFile("Properties/ocelot.json", optional: false, reloadOnChange: true);
 
             // Load additional Ocelot JSON files dynamically from "ocelot-configs" folder
             //var configFiles = Directory.GetFiles("ocelot-configs", "*.json", SearchOption.AllDirectories);
@@ -51,8 +52,8 @@ namespace ApiGateway
 
             app.UseAuthorization();
 
-            app.Urls.Add("http://0.0.0.0:8080");
-            //app.Urls.Add("https://0.0.0.0:8081");
+            app.Urls.Add("http://0.0.0.0:8086");
+            //app.Urls.Add("https://0.0.0.0:8087");
 
             app.MapControllers();
 
