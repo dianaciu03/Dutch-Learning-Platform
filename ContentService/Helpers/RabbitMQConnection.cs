@@ -17,8 +17,8 @@ namespace ContentService.Helpers
             _factory = new ConnectionFactory
             {
                 HostName = hostName,
-                //UserName = userName,
-                //Password = password
+                UserName = userName,
+                Password = password
             };
 
             // Ensure connection is established when the class is instantiated
@@ -47,8 +47,10 @@ namespace ContentService.Helpers
 
             var body = Encoding.UTF8.GetBytes(message);
 
-            var properties = new BasicProperties(); // Use BasicProperties directly
-            properties.Persistent = true;  // Make sure the message is persisted
+            var properties = new BasicProperties
+            {
+                Persistent = true  // Make sure the message is persisted
+            }; 
 
             // Publish the message to the queue
             Task.Run(async () =>

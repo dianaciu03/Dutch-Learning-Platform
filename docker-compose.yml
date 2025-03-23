@@ -1,8 +1,8 @@
 services:
   user-service:
     build:
-      context: .
-      dockerfile: UserService/Dockerfile
+      context: ./UserService
+      dockerfile: Dockerfile
     container_name: ss-user-service
     ports:
       - "8084:8084" # http
@@ -14,16 +14,14 @@ services:
         condition: service_healthy
       cosmosdb-emulator:
         condition: service_started
-    env_file:
-      - .env
     networks:
       - slimstudie-network
     restart: always
 
   content-service:
     build:
-      context: .
-      dockerfile: ContentService/Dockerfile
+      context: ./ContentService
+      dockerfile: Dockerfile
     container_name: ss-content-service
     ports:
       - "8082:8082" # http
@@ -35,8 +33,6 @@ services:
         condition: service_healthy
       cosmosdb-emulator:
         condition: service_started
-    env_file:
-      - .env
     networks:
       - slimstudie-network
     restart: always
@@ -51,7 +47,7 @@ services:
       - "8087:8087" # https
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - OCELOT_CONFIG_PATH=/app/Properties/ocelot.json
+      - DOCKER_OCELOT_CONFIG_PATH=/app/Properties/ocelot.json
     networks:
       - slimstudie-network
     restart: always
@@ -64,8 +60,8 @@ services:
       - "15672:15672"  # Management UI port
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq  # Stores messages/queues
-    env_file:
-      - .env
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
     networks:
       - slimstudie-network
     healthcheck:
@@ -87,8 +83,6 @@ services:
     environment:
       - AZURE_COSMOS_EMULATOR_PARTITION_COUNT=10
       - AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE=true
-    env_file:
-      - .env
     volumes:
     - cosmosdb_data:/tmp/cosmos/appdata  # Persists data to the host
     networks:
@@ -109,6 +103,4 @@ volumes:
     driver: local 
   rabbitmq_data:  
     driver: local 
-  rabbitmq_log: 
-    driver: local
 
