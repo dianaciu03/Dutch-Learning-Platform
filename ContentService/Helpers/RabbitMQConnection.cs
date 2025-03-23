@@ -17,21 +17,17 @@ namespace ContentService.Helpers
             _factory = new ConnectionFactory
             {
                 HostName = hostName,
-                UserName = userName,
-                Password = password
+                //UserName = userName,
+                //Password = password
             };
 
             // Ensure connection is established when the class is instantiated
-            Task.Run(async () => await ConnectAsync()).GetAwaiter().GetResult();
-        }
-
-        public async Task ConnectAsync()
-        {
             try
             {
-                _connection = await _factory.CreateConnectionAsync();
-                _channel = await _connection.CreateChannelAsync(); // Newer versions use this
+                _connection = _factory.CreateConnectionAsync().GetAwaiter().GetResult();
                 _logger.LogInfo("Connected to RabbitMQ.");
+                _channel = _connection.CreateChannelAsync().GetAwaiter().GetResult();
+                _logger.LogInfo("Channel created in RabbitMQ.");
             }
             catch (BrokerUnreachableException ex)
             {

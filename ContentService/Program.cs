@@ -47,6 +47,8 @@ namespace ContentService
             }
 
             //app.UseHttpsRedirection();
+            app.Urls.Add("http://0.0.0.0:8082");
+            //app.Urls.Add("https://0.0.0.0:8083");
 
             app.UseAuthorization();
 
