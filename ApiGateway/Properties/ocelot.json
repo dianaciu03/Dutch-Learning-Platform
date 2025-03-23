@@ -1,0 +1,92 @@
+﻿{
+    "Routes": [
+        {
+            "DownstreamPathTemplate": "/api/exams/components",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "ss-content-service",
+                    "Port": 8082
+                }
+            ],
+            "UpstreamPathTemplate": "/components",
+            "UpstreamHttpMethod": [ "GET", "POST" ]
+        },
+        {
+            "DownstreamPathTemplate": "/api/exams",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "ss-content-service",
+                    "Port": 8082
+                }
+            ],
+            "UpstreamPathTemplate": "/exams",
+            "UpstreamHttpMethod": [ "GET", "POST" ]
+        },
+        {
+            "DownstreamPathTemplate": "/api/exams/{id}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "ss-content-service",
+                    "Port": 8082
+                }
+            ],
+            "UpstreamPathTemplate": "/exams/{id}",
+            "UpstreamHttpMethod": [ "GET", "PUT", "DELETE" ]
+        },
+        {
+            "DownstreamPathTemplate": "/api/accounts/teacher",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "ss-user-service",
+                    "Port": 8082
+                }
+            ],
+            "UpstreamPathTemplate": "/accounts/teacher",
+            "UpstreamHttpMethod": [ "POST" ]
+        },
+        {
+            "DownstreamPathTemplate": "/api/accounts/student",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "ss-user-service",
+                    "Port": 8084
+                }
+            ],
+            "UpstreamPathTemplate": "/accounts/student",
+            "UpstreamHttpMethod": [ "POST" ]
+        },
+        {
+            "DownstreamPathTemplate": "/api/accounts",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "ss-user-service",
+                    "Port": 8084
+                }
+            ],
+            "UpstreamPathTemplate": "/accounts",
+            "UpstreamHttpMethod": [ "GET" ]
+        },
+        {
+            "DownstreamPathTemplate": "/api/accounts/{id}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "ss-user-service",
+                    "Port": 8084
+                }
+            ],
+            "UpstreamPathTemplate": "/accounts/{id}",
+            "UpstreamHttpMethod": [ "GET", "PUT", "DELETE" ]
+        }
+    ],
+    "GlobalConfiguration": {
+        "BaseUrl": "http://ss-api-gateway:8086"
+    },
+    "Aggregates": []
+}

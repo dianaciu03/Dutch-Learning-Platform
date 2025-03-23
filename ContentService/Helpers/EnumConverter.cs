@@ -9,13 +9,13 @@ namespace ContentService.Helpers
 {
     public static class EnumConverter
     {
-        public static ExerciseType ParseExerciseType(string type)
+        public static ExamType ParseExamType(string type)
         {
-            if (Enum.TryParse(type, true, out ExerciseType result))
+            if (Enum.TryParse(type, true, out ExamType result))
             {
                 return result;
             }
-            throw new ArgumentException($"Invalid exercise type: {type}");
+            throw new ArgumentException($"Invalid exam type: {type}");
         }
 
         public static CEFRLevel ParseCEFRLevel(string level)
