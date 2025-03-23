@@ -70,13 +70,26 @@ jobs:
       - name: Log in to DockerHub
         run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
 
-      - name: Build Docker Image
+      - name: Build User Service Docker Image
         run: |
-          docker build -t my-app:latest .
-          docker tag my-app:latest ${{ secrets.DOCKER_HUB_USERNAME }}/my-app:latest
+          docker build -t my-user-service:latest -f UserService/Dockerfile UserService/
+          docker tag my-user-service:latest ${{ secrets.DOCKER_HUB_USERNAME }}/my-user-service:latest
 
-      - name: Push Docker Image
-        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/my-app:latest
+      - name: Build Content Service Docker Image
+        run: |
+          docker build -t my-content-service:latest -f ContentService/Dockerfile ContentService/
+          docker tag my-content-service:latest ${{ secrets.DOCKER_HUB_USERNAME }}/my-content-service:latest
+      
+      - name: Build API Gateway Docker Image
+        run: |
+          docker build -t my-api-gateway:latest -f ApiGateway/Dockerfile ApiGateway/
+          docker tag my-api-gateway:latest ${{ secrets.DOCKER_HUB_USERNAME }}/my-api-gateway:latest
+      
+      - name: Push Docker Images
+        run: |
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/my-user-service:latest
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/my-content-service:latest
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/my-api-gateway:latest
 
       - name: Deploy with Docker Compose
         env:
@@ -87,7 +100,7 @@ jobs:
           DOCKER_RABBITMQ_USER: ${{ secrets.DOCKER_RABBITMQ_USER }}
           DOCKER_RABBITMQ_PASSWORD: ${{ secrets.DOCKER_RABBITMQ_PASSWORD }}
         run: |
-          docker-compose -f docker-compose.yml up -d
+          docker-compose -f docker-compose.yml up -d --build
 
   # Job 4: Integration Tests
   integration-tests:
