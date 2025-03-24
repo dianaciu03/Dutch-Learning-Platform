@@ -91,6 +91,9 @@ jobs:
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/my-content-service:latest
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/my-api-gateway:latest
 
+      - name: Install Docker Compose
+        run: sudo apt-get update && sudo apt-get install -y docker-compose
+
       - name: Deploy with Docker Compose
         env:
           DOCKER_COSMOSDB_CONNECTION_STRING: ${{ secrets.DOCKER_COSMOSDB_CONNECTION_STRING }}
