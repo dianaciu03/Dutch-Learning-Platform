@@ -36,11 +36,6 @@ namespace ApiGateway
 
                 // Load additional Ocelot JSON files dynamically from "ocelot-configs" folder
                 builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
-                var configFiles = Directory.GetFiles("ocelot-configs", "*.json", SearchOption.AllDirectories);
-                foreach (var file in configFiles)
-                {
-                    builder.Configuration.AddJsonFile(file, optional: false, reloadOnChange: true);
-                }
             }
 
             builder.Services.AddOcelot();

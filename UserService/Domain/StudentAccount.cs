@@ -1,4 +1,6 @@
-﻿namespace UserService.Domain
+﻿using Newtonsoft.Json;
+
+namespace UserService.Domain
 {
     public class StudentAccount : UserAccount
     {
@@ -6,7 +8,8 @@
         public string Email { get; set; }
         public string Password { get; set; }
 
-        public StudentAccount(int id, string firstName, string lastName, string username)
+        [JsonConstructor]
+        public StudentAccount(string id, string firstName, string lastName, string username)
             : base(id, firstName, lastName, username)
         {
             CompletedExercises = [];

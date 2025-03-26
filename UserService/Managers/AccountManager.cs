@@ -8,7 +8,6 @@ namespace UserService.Managers
     public class AccountManager : IAccountManager
     {
         private readonly RabbitMQConnection _rabbitMqConnection;
-        private readonly List<UserAccount> _accounts = new List<UserAccount>();
         private readonly LogHelper<AccountManager> _logger;
         private readonly IAccountRepository _accountRepository;
 
@@ -34,8 +33,7 @@ namespace UserService.Managers
                 teacher.Email = request.Email;
                 teacher.Password = request.Password;
 
-                _accounts.Add( teacher );
-                //_accountRepository.SaveTeacherAccountAsync(teacher);
+                _accountRepository.SaveTeacherAccountAsync(teacher);
 
                 _logger.LogInfo("Created new teacher account: {0}", teacher.Username);
                 return true;
@@ -61,6 +59,8 @@ namespace UserService.Managers
                 student.Email = request.Email;
                 student.Password = request.Password;
 
+                _accountRepository.SaveStudentAccountAsync(student);
+
                 _logger.LogInfo("Creating new student account: {0}", student.Username);
                 return true;
             }
@@ -72,20 +72,44 @@ namespace UserService.Managers
         }
 
         // Get Account By ID
-        public AccountResponse GetAccountById(int id)
+        public AccountResponse GetTeacherAccountById(string id)
         {
             try
             {
                 _logger.LogInfo("Fetching account with ID: {0}", id);
-                var account = _accounts.FirstOrDefault(e => e.Id == id);
 
-                // Prepare a message that will be sent to RabbitMQ
-                var message = $"Account fetched: {id}";
+                TeacherAccount account = _accountRepository.GetTeacherAccountByIdAsync(id.ToString()).GetAwaiter().GetResult();
+                UserAccount userAccount = account as UserAccount;
 
-                // Assuming you have an instance of RabbitMQConnection, e.g. _rabbitMqConnection
-                _rabbitMqConnection.PublishMessage(message, "accountQueue");
+                if (account == null)
+                {
+                    return new AccountResponse { AccountList = new List<UserAccount>() };
+                }
 
-                return new AccountResponse { AccountList = new List<UserAccount> { account } };
+                return new AccountResponse { AccountList = new List<UserAccount> { userAccount } };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error while fetching account.", ex);
+                return new AccountResponse { AccountList = new List<UserAccount>() };
+            }
+        }
+
+        public AccountResponse GetStudentAccountById(string id)
+        {
+            try
+            {
+                _logger.LogInfo("Fetching account with ID: {0}", id);
+
+                StudentAccount account = _accountRepository.GetStudentAccountByIdAsync(id.ToString()).GetAwaiter().GetResult();
+                UserAccount userAccount = account as UserAccount;
+
+                if (account == null)
+                {
+                    return new AccountResponse { AccountList = new List<UserAccount>() };
+                }
+
+                return new AccountResponse { AccountList = new List<UserAccount> { userAccount } };
             }
             catch (Exception ex)
             {
@@ -99,7 +123,8 @@ namespace UserService.Managers
         {
             try
             {
-                return new AccountResponse { AccountList = _accounts };
+                var accounts = _accountRepository.GetAllAccountsAsync().GetAwaiter().GetResult();
+                return new AccountResponse { AccountList = accounts };
             }
             catch (Exception ex)
             {
@@ -110,22 +135,29 @@ namespace UserService.Managers
 
 
         // Delete Account
-        public bool DeleteAccount(int id)
+        public bool DeleteAccount(string id)
         {
             try
             {
-                var account = _accounts.FirstOrDefault(e => e.Id == id);
-                if (account == null)
+                // Prepare a message that will be sent to RabbitMQ
+                var message = $"Account to delete: {id}";
+
+                // Assuming you have an instance of RabbitMQConnection, e.g. _rabbitMqConnection
+                _rabbitMqConnection.PublishMessage(message, "accountQueue");
+
+                var success = _accountRepository.DeleteAccountAsync(id.ToString()).GetAwaiter().GetResult();
+
+                if (!success)
                 {
                     _logger.LogWarning("Account could not be found.");
                     return false;
                 }
-                _accounts.Remove(account);
+
                 return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error while deleting exam.", ex);
+                _logger.LogError("Error while deleting account.", ex);
                 return false;
             }
         }
