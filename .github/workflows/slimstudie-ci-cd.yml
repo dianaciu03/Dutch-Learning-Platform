@@ -52,7 +52,7 @@ jobs:
         run: dotnet restore
 
       - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/dotnet@master
+        uses: snyk/actions@0.4.0
         continue-on-error: true  # Allows the job to continue even if vulnerabilities are found
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }} 
