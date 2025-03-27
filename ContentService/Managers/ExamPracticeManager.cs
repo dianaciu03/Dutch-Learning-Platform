@@ -175,15 +175,19 @@ namespace ContentService.Managers
             //_logger.LogInfo("Content service is listening for messages...");
         }
 
-        private int? ExtractAccountId(string message)
+        private Guid? ExtractAccountId(string message)
         {
-            // Assuming the message is something like: "Account fetched: {id}"
-            if (message.StartsWith("Account fetched:"))
+            // Assuming the message follows this format: "Account to delete: {id}"
+            if (message.StartsWith("Account to delete:"))
             {
                 var parts = message.Split(':');
-                if (parts.Length > 1 && int.TryParse(parts[1].Trim(), out int id))
+                if (parts.Length > 1)
                 {
-                    return id;
+                    string idPart = parts[1].Trim();
+                    if (Guid.TryParse(idPart, out Guid id))
+                    {
+                        return id;
+                    }
                 }
             }
             return null;

@@ -73,6 +73,30 @@
             "UpstreamHttpMethod": [ "GET" ]
         },
         {
+            "DownstreamPathTemplate": "/api/accounts/teacher/{id}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "ss-user-service",
+                    "Port": 8084
+                }
+            ],
+            "UpstreamPathTemplate": "/accounts/teacher/{id}",
+            "UpstreamHttpMethod": [ "GET", "PUT" ]
+        },
+        {
+            "DownstreamPathTemplate": "/api/accounts/student/{id}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "ss-user-service",
+                    "Port": 8084
+                }
+            ],
+            "UpstreamPathTemplate": "/accounts/student/{id}",
+            "UpstreamHttpMethod": [ "GET", "PUT" ]
+        },
+        {
             "DownstreamPathTemplate": "/api/accounts/{id}",
             "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
@@ -82,7 +106,7 @@
                 }
             ],
             "UpstreamPathTemplate": "/accounts/{id}",
-            "UpstreamHttpMethod": [ "GET", "PUT", "DELETE" ]
+            "UpstreamHttpMethod": [ "DELETE" ]
         }
     ],
     "GlobalConfiguration": {

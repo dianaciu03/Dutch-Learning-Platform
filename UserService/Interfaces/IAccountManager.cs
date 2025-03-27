@@ -7,8 +7,9 @@ namespace UserService.Interfaces
         bool CreateTeacherAccount(CreateTeacherAccountRequest request);
         bool CreateStudentAccount(CreateStudentAccountRequest request);
         AccountResponse GetAllAccounts();
-        AccountResponse GetAccountById(int id);
-        bool DeleteAccount(int id);
+        AccountResponse GetTeacherAccountById(string id);
+        AccountResponse GetStudentAccountById(string id);
+        bool DeleteAccount(string id);
 
     }
 }
