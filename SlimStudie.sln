@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiGateway", "ApiGateway\Ap
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService", "UserService\UserService.csproj", "{12B8A420-8570-4615-A8AA-610AD1AEE703}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests", "IntegrationTests\IntegrationTests.csproj", "{AFD18A06-F6A2-43BB-A004-7BEF32074911}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{12B8A420-8570-4615-A8AA-610AD1AEE703}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{12B8A420-8570-4615-A8AA-610AD1AEE703}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{12B8A420-8570-4615-A8AA-610AD1AEE703}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFD18A06-F6A2-43BB-A004-7BEF32074911}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFD18A06-F6A2-43BB-A004-7BEF32074911}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFD18A06-F6A2-43BB-A004-7BEF32074911}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFD18A06-F6A2-43BB-A004-7BEF32074911}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

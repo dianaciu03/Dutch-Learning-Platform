@@ -12,7 +12,7 @@ namespace UserService.Helpers
         private IConnection _connection;
         private IChannel _channel;
 
-        public RabbitMQConnection(string hostName, string userName, string password)
+        public RabbitMQConnection(string hostName, string userName, string password, int? port = null)
         {
             _logger = new LogHelper<RabbitMQConnection>();
             _factory = new ConnectionFactory
@@ -21,6 +21,12 @@ namespace UserService.Helpers
                 UserName = userName,
                 Password = password
             };
+
+            // If port is not null, set the port
+            if (port.HasValue)
+            {
+                _factory.Port = port.Value;
+            }
 
             // Ensure connection is established when the class is instantiated
             Task.Run(async () => await ConnectAsync()).GetAwaiter().GetResult();

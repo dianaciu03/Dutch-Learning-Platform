@@ -37,18 +37,6 @@
             "UpstreamHttpMethod": [ "GET", "PUT", "DELETE" ]
         },
         {
-            "DownstreamPathTemplate": "/api/accounts/{id}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "localhost",
-                    "Port": 5002
-                }
-            ],
-            "UpstreamPathTemplate": "/accounts/{id}",
-            "UpstreamHttpMethod": [ "GET", "PUT", "DELETE" ]
-        },
-        {
             "DownstreamPathTemplate": "/api/accounts/student",
             "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
@@ -59,6 +47,18 @@
             ],
             "UpstreamPathTemplate": "/accounts/student",
             "UpstreamHttpMethod": [ "POST" ]
+        },
+        {
+            "DownstreamPathTemplate": "/api/accounts/student/{id}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 5002
+                }
+            ],
+            "UpstreamPathTemplate": "/accounts/student/{id}",
+            "UpstreamHttpMethod": [ "GET" ]
         },
         {
             "DownstreamPathTemplate": "/api/accounts",
@@ -73,6 +73,18 @@
             "UpstreamHttpMethod": [ "GET" ]
         },
         {
+            "DownstreamPathTemplate": "/api/accounts/{id}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 5002
+                }
+            ],
+            "UpstreamPathTemplate": "/accounts/{id}",
+            "UpstreamHttpMethod": [ "DELETE" ]
+        },
+        {
             "DownstreamPathTemplate": "/api/accounts/teacher",
             "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
@@ -83,6 +95,18 @@
             ],
             "UpstreamPathTemplate": "/accounts/teacher",
             "UpstreamHttpMethod": [ "POST" ]
+        },
+        {
+            "DownstreamPathTemplate": "/api/accounts/teacher/{id}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 5002
+                }
+            ],
+            "UpstreamPathTemplate": "/accounts/teacher/{id}",
+            "UpstreamHttpMethod": [ "GET" ]
         }
     ],
     "GlobalConfiguration": {

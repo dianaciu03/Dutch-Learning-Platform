@@ -16,8 +16,10 @@ namespace UserService
 
             // Check if the environment is Docker (from GitHub CI/CD pipeline)
             var dockerEnv = Environment.GetEnvironmentVariable("DOCKER_ENV");
+            var integrationTestEnv = Environment.GetEnvironmentVariable("INTEGRATION_TEST_ENV");
             Console.WriteLine($"DOCKER_ENV: {dockerEnv}");
 
+            var envPrefix = (dockerEnv == "true") ? "DOCKER_" : (integrationTestEnv == "true") ? "INT_TEST_" : "";
 
             if (dockerEnv != "true")
             {
@@ -25,7 +27,6 @@ namespace UserService
                 var envFilePath = Path.Combine(Directory.GetCurrentDirectory(), "..", ".env");
                 Env.Load(envFilePath);
             }
-
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -39,18 +40,7 @@ namespace UserService
             // Register CosmosDBConnection as a Singleton
             builder.Services.AddSingleton<CosmosDBConnection>(sp =>
             {
-                string connectionString;
-
-                if (dockerEnv == "true")
-                {
-                    // DOCKER ENVIRONMENT
-                    connectionString = Environment.GetEnvironmentVariable("DOCKER_COSMOSDB_CONNECTION_STRING");
-                }
-                else
-                {
-                    // LOCAL ENVIRONMENT
-                    connectionString = Environment.GetEnvironmentVariable("COSMOSDB_CONNECTION_STRING");
-                }
+                string connectionString = Environment.GetEnvironmentVariable($"{envPrefix}COSMOSDB_CONNECTION_STRING");
 
                 // Check if the connection string is empty or null
                 if (string.IsNullOrEmpty(connectionString))
@@ -69,21 +59,8 @@ namespace UserService
                 // Resolve CosmosDBConnection from DI container
                 var cosmosDBConnection = sp.GetRequiredService<CosmosDBConnection>();
 
-                string databaseName;
-                string containerName;
-
-                if (dockerEnv == "true")
-                {
-                    // DOCKER ENVIRONMENT
-                    databaseName = Environment.GetEnvironmentVariable("DOCKER_COSMOSDB_DATABASE_NAME"); 
-                    containerName = Environment.GetEnvironmentVariable("DOCKER_COSMOSDB_CONTAINER_NAME"); 
-                }
-                else
-                {
-                    // LOCAL ENVIRONMENT
-                    databaseName = Environment.GetEnvironmentVariable("COSMOSDB_DATABASE_NAME"); 
-                    containerName = Environment.GetEnvironmentVariable("COSMOSDB_CONTAINER_NAME"); 
-                }
+                string databaseName = Environment.GetEnvironmentVariable($"{envPrefix}COSMOSDB_DATABASE_NAME"); 
+                string containerName = Environment.GetEnvironmentVariable($"{envPrefix}COSMOSDB_CONTAINER_NAME");
 
                 if (string.IsNullOrEmpty(databaseName) || string.IsNullOrEmpty(containerName))
                 {
@@ -94,33 +71,16 @@ namespace UserService
                 return new AccountRepository(cosmosDBConnection, databaseName, containerName);
             });
 
-
             // Register RabbitMQConnection as a Singleton
             builder.Services.AddSingleton<RabbitMQConnection>(sp =>
             {
-                // Check if we are running in a Docker environment (based on the DOCKER_ENV variable)
-                var dockerEnv = Environment.GetEnvironmentVariable("DOCKER_ENV");
-
-                string rabbitMqHost, rabbitMqUser, rabbitMqPassword;
-
-                if (dockerEnv == "true")
-                {
-                    // DOCKER ENVIRONMENT
-                    rabbitMqHost = Environment.GetEnvironmentVariable("DOCKER_RABBITMQ_HOST");
-                    rabbitMqUser = Environment.GetEnvironmentVariable("DOCKER_RABBITMQ_USER");
-                    rabbitMqPassword = Environment.GetEnvironmentVariable("DOCKER_RABBITMQ_PASSWORD");
-                }
-                else
-                {
-                    // LOCAL ENVIRONMENT
-                    rabbitMqHost = Environment.GetEnvironmentVariable("RABBITMQ_HOST");
-                    rabbitMqUser = Environment.GetEnvironmentVariable("RABBITMQ_USER");
-                    rabbitMqPassword = Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD");
-                }
+                string rabbitMqHost = Environment.GetEnvironmentVariable($"{envPrefix}RABBITMQ_HOST");
+                string rabbitMqUser = Environment.GetEnvironmentVariable($"{envPrefix}RABBITMQ_USER");
+                string rabbitMqPassword = Environment.GetEnvironmentVariable($"{envPrefix}RABBITMQ_PASSWORD");
 
                 if (string.IsNullOrEmpty(rabbitMqHost) || string.IsNullOrEmpty(rabbitMqUser) || string.IsNullOrEmpty(rabbitMqPassword))
                 {
-                    throw new InvalidOperationException("RabbitMQ connection details are not set.");
+                    throw new InvalidOperationException($"RabbitMQ connection details are not set.");
                 }
 
                 // Return the RabbitMQ connection using the values fetched from the environment variables
@@ -151,6 +111,7 @@ namespace UserService
             app.MapControllers();
 
             app.Run();
+
         }
     }
 }
