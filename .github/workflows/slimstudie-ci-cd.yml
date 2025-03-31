@@ -45,6 +45,7 @@ jobs:
         path: |
           publish/
           SlimStudie.sln
+          **/obj/project.assets.json  # Include dependency files for Snyk
 
   # Job 2: Check Security Vulnerabilities
   security:
@@ -57,20 +58,20 @@ jobs:
         with:
           name: build-output
           path: publish
-
-      - name: Restore Dependencies
-        run: dotnet restore publish/SlimStudie.sln
       
       - name: Run Snyk to check for vulnerabilities
         uses: snyk/actions@0.4.0
         continue-on-error: true  # Allows the job to continue even if vulnerabilities are found
         env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }} 
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --file=publish/**/project.assets.json
 
       - name: Verify SARIF File Exists
         run: ls $GITHUB_WORKSPACE/snyk.sarif || echo "SARIF file not found!"
 
       - name: Upload result to GitHub Code Scanning
+        if: ${{ exists($GITHUB_WORKSPACE + '/snyk.sarif') }} # Only run if the SARIF file exists
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: snyk.sarif
