@@ -101,7 +101,7 @@ jobs:
       run: dotnet build --no-restore --configuration Release
 
     - name: Run Integration Tests
-      run: dotnet test publish/SlimStudie.sln --no-build --configuration Release --logger trx --results-directory TestResults
+      run: dotnet test SlimStudie.sln --no-build --configuration Release --logger trx --results-directory TestResults
       
     - name: Ensure TestResults Directory Exists
       run: mkdir -p TestResults
