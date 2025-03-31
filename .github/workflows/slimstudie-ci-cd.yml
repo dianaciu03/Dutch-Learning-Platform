@@ -45,7 +45,7 @@ jobs:
         path: |
           publish/
           SlimStudie.sln
-          **/obj/project.assets.json  # Include dependency files for Snyk
+          **/obj/project.assets.json
 
   # Job 2: Check Security Vulnerabilities
   security:
@@ -53,11 +53,16 @@ jobs:
     runs-on: ubuntu-latest
     needs: build  # This ensures the security job will run after the build job completes successfully.
     steps:
-      - name: Download and build artifacts
-        uses: actions/download-artifact@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
         with:
-          name: build-output
-          path: publish
+          dotnet-version: 8.0.x
+  
+      - name: Install Dependencies
+        run: dotnet restore
       
       - name: Run Snyk to check for vulnerabilities
         uses: snyk/actions@0.4.0
@@ -88,6 +93,12 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
+
+    - name: Restore Dependencies
+      run: dotnet restore
+
+    - name: Build Project
+      run: dotnet build --no-restore --configuration Release
           
     - name: Download and build artifacts
       uses: actions/download-artifact@v4
