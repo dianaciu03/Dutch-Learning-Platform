@@ -62,7 +62,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }} 
         with:
-          args: --file=SlimStudie.sln --sarif-file-output=$GITHUB_WORKSPACE/snyk.sarif
+          args: --file=SlimStudie.sln --sarif-file-output=snyk.sarif
 
       - name: Verify SARIF File Exists
         run: ls $GITHUB_WORKSPACE/snyk.sarif || echo "SARIF file not found!"
