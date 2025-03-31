@@ -61,8 +61,6 @@ jobs:
         continue-on-error: true  # Allows the job to continue even if vulnerabilities are found
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }} 
-        with:
-          args: --file=SlimStudie.sln --sarif-file-output=snyk.sarif
 
       - name: Verify SARIF File Exists
         run: ls $GITHUB_WORKSPACE/snyk.sarif || echo "SARIF file not found!"
