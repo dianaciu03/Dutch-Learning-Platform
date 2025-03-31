@@ -44,8 +44,8 @@ jobs:
         name: build-output
         path: |
           publish/
-          SlimStudie.sln
-          **/obj/project.assets.json
+          publish/SlimStudie.sln
+          publish/obj/project.assets.json
 
   # Job 2: Check Security Vulnerabilities
   security:
@@ -70,7 +70,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --file=publish/**/project.assets.json
+           args: --file=SlimStudie.sln --sarif-file-output=snyk.sarif
 
       - name: Verify SARIF File Exists
         run: ls $GITHUB_WORKSPACE/snyk.sarif || echo "SARIF file not found!"
@@ -99,12 +99,6 @@ jobs:
 
     - name: Build Project
       run: dotnet build --no-restore --configuration Release
-          
-    - name: Download and build artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: build-output
-        path: publish
 
     - name: Run Integration Tests
       run: dotnet test publish/SlimStudie.sln --no-build --configuration Release --logger trx --results-directory TestResults
