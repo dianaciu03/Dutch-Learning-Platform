@@ -62,12 +62,15 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }} 
         with:
-          args: --file=SlimStudie.sln --sarif-file-output=snyk.sarif
+          args: --file=SlimStudie.sln --sarif-file-output=publish/snyk.sarif
+
+      - name: Verify SARIF File Exists
+        run: ls publish/snyk.sarif || echo "SARIF file not found!"
 
       - name: Upload result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: snyk.sarif
+          sarif_file: publish/snyk.sarif
 
   # Job 3: Integration Tests
   integration-tests:
