@@ -71,7 +71,7 @@ jobs:
         run: ls $GITHUB_WORKSPACE/snyk.sarif || echo "SARIF file not found!"
 
       - name: Upload result to GitHub Code Scanning
-        if: ${{ exists($GITHUB_WORKSPACE + '/snyk.sarif') }} # Only run if the SARIF file exists
+        if: ${{ exists(format('{0}/snyk.sarif', github.workspace)) }} # Only run if the SARIF file exists
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: snyk.sarif
