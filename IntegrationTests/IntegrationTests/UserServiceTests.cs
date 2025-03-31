@@ -133,29 +133,5 @@ namespace IntegrationTests.IntegrationTests
             //Assert.NotEmpty(users);
             //Assert.Equal(teacherRequest.Username, users.First().Username);
         }
-
-        //private static void LoginToDocker()
-        //{
-        //    var process = new System.Diagnostics.Process
-        //    {
-        //        StartInfo = new System.Diagnostics.ProcessStartInfo
-        //        {
-        //            FileName = "docker",
-        //            Arguments = $"login -u {Environment.GetEnvironmentVariable("DOCKER_USERNAME")} -p {Environment.GetEnvironmentVariable("DOCKER_PASSWORD")}",
-        //            RedirectStandardOutput = true,
-        //            RedirectStandardError = true,
-        //            UseShellExecute = false,
-        //            CreateNoWindow = true
-        //        }
-        //    };
-
-        //    process.Start();
-        //    process.WaitForExit();
-
-        //    if (process.ExitCode != 0)
-        //    {
-        //        throw new Exception($"Docker login failed: {process.StandardError.ReadToEnd()}");
-        //    }
-        //}
     }
 }
