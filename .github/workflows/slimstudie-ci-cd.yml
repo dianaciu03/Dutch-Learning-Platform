@@ -44,7 +44,7 @@ jobs:
         name: build-output
         path: |
           publish/
-          MySolution.sln
+          SlimStudie.sln
 
   # Job 2: Check Security Vulnerabilities
   security:
@@ -59,7 +59,7 @@ jobs:
           path: publish
 
       - name: Restore Dependencies
-        run: dotnet restore publish/
+        run: dotnet restore publish/SlimStudie.sln
       
       - name: Run Snyk to check for vulnerabilities
         uses: snyk/actions@0.4.0
