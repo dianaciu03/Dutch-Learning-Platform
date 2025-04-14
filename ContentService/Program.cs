@@ -3,6 +3,7 @@ using ContentService.Helpers;
 using ContentService.Interfaces;
 using ContentService.Managers;
 using DotNetEnv;
+using Prometheus;
 
 namespace ContentService
 {
@@ -17,8 +18,10 @@ namespace ContentService
 
             // Check if the environment is Docker (from GitHub CI/CD pipeline)
             var dockerEnv = Environment.GetEnvironmentVariable("DOCKER_ENV");
+            var integrationTestEnv = Environment.GetEnvironmentVariable("INTEGRATION_TEST_ENV");
             Console.WriteLine($"DOCKER_ENV: {dockerEnv}");
 
+            var envPrefix = (dockerEnv == "true") ? "DOCKER_" : (integrationTestEnv == "true") ? "INT_TEST_" : "";
 
             if (dockerEnv != "true")
             {
@@ -27,38 +30,23 @@ namespace ContentService
                 Env.Load(envFilePath);
             }
 
-
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-
             // Register RabbitMQConnection as a Singleton
             builder.Services.AddSingleton<RabbitMQConnection>(sp =>
             {
-                string rabbitMqHost, rabbitMqUser, rabbitMqPassword;
-
-                if (dockerEnv == "true")
-                {
-                    // DOCKER ENVIRONMENT
-                    rabbitMqHost = Environment.GetEnvironmentVariable("DOCKER_RABBITMQ_HOST");
-                    rabbitMqUser = Environment.GetEnvironmentVariable("DOCKER_RABBITMQ_USER");
-                    rabbitMqPassword = Environment.GetEnvironmentVariable("DOCKER_RABBITMQ_PASSWORD");
-                }
-                else
-                {
-                    // LOCAL ENVIRONMENT
-                    rabbitMqHost = Environment.GetEnvironmentVariable("RABBITMQ_HOST");
-                    rabbitMqUser = Environment.GetEnvironmentVariable("RABBITMQ_USER");
-                    rabbitMqPassword = Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD");
-                }
+                string rabbitMqHost = Environment.GetEnvironmentVariable($"{envPrefix}RABBITMQ_HOST");
+                string rabbitMqUser = Environment.GetEnvironmentVariable($"{envPrefix}RABBITMQ_USER");
+                string rabbitMqPassword = Environment.GetEnvironmentVariable($"{envPrefix}RABBITMQ_PASSWORD");
 
                 if (string.IsNullOrEmpty(rabbitMqHost) || string.IsNullOrEmpty(rabbitMqUser) || string.IsNullOrEmpty(rabbitMqPassword))
                 {
                     throw new InvalidOperationException("RabbitMQ connection details are not set.");
                 }
-
+                
                 // Return the RabbitMQ connection using the values fetched from the environment variables
                 return new RabbitMQConnection(rabbitMqHost, rabbitMqUser, rabbitMqPassword);
             });
@@ -77,6 +65,13 @@ namespace ContentService
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            // Enable Prometheus scraping at /metrics
+            app.UseRouting();
+            app.UseHttpMetrics(); // middleware that tracks request durations, status codes, etc.
+                                  // Add the /metrics endpoint for Prometheus
+
+            app.MapMetrics();  // This exposes metrics at the /metrics endpoint
 
             //app.UseHttpsRedirection();
             app.UseAuthorization();

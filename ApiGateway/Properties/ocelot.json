@@ -42,7 +42,7 @@
             "DownstreamHostAndPorts": [
                 {
                     "Host": "ss-user-service",
-                    "Port": 8082
+                    "Port": 8084
                 }
             ],
             "UpstreamPathTemplate": "/accounts/teacher",

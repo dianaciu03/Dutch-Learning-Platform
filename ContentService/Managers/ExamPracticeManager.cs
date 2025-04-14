@@ -147,9 +147,11 @@ namespace ContentService.Managers
         public async Task StartListeningAsync()
         {
             var channel = _rabbitMqConnection.GetChannel();
+            _logger.LogInfo("Listening to the channel {0}", channel);
 
             // Declare the queue you want to listen to
             await channel.QueueDeclareAsync(queue: "accountQueue", durable: true, exclusive: false, autoDelete: false);
+            _logger.LogInfo("Listening to the accountQueue...");
 
             // Create a consumer
             var consumer = new AsyncEventingBasicConsumer(channel);

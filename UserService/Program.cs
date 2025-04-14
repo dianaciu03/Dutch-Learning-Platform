@@ -1,4 +1,5 @@
 using DotNetEnv;
+using Prometheus;
 using UserService.Helpers;
 using UserService.Interfaces;
 using UserService.Managers;
@@ -87,8 +88,6 @@ namespace UserService
                 return new RabbitMQConnection(rabbitMqHost, rabbitMqUser, rabbitMqPassword);
             });
 
-
-
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -97,6 +96,13 @@ namespace UserService
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            // Enable Prometheus scraping at /metrics
+            app.UseRouting();
+            app.UseHttpMetrics(); // middleware that tracks request durations, status codes, etc.
+                                  // Add the /metrics endpoint for Prometheus
+
+            app.MapMetrics();  // This exposes metrics at the /metrics endpoint
 
             //app.UseHttpsRedirection();
             app.UseAuthorization();

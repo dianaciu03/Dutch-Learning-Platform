@@ -9,6 +9,9 @@ services:
       - "8085:8085" # https
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - DOCKER_ENV=true
+    env_file:
+      - .env
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -28,6 +31,9 @@ services:
       - "8083:8083" # https
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - DOCKER_ENV=true
+    env_file:
+      - .env
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -48,6 +54,9 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - DOCKER_OCELOT_CONFIG_PATH=/app/Properties/ocelot.json
+      - DOCKER_ENV=true
+    env_file:
+      - .env
     networks:
       - slimstudie-network
     restart: always
@@ -94,6 +103,32 @@ services:
       retries: 5
     restart: always
 
+  # Prometheus Service for Monitoring
+  prometheus:
+    image: prom/prometheus:v2.42.0
+    container_name: ss-prometheus
+    ports:
+      - "9090:9090"  # Prometheus UI
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml  # Configuration file for Prometheus
+    networks:
+      - slimstudie-network
+    restart: always
+
+  # Grafana Service for Visualization
+  grafana:
+    image: grafana/grafana:8.3.0
+    container_name: ss-grafana
+    ports:
+      - "3000:3000"  # Grafana UI
+    volumes:
+      - grafana_data:/var/lib/grafana # Persist Grafana data (dashboards, etc.)
+    depends_on:
+      - prometheus
+    networks:
+      - slimstudie-network
+    restart: always
+
 networks:
   slimstudie-network:
     driver: bridge
@@ -102,5 +137,7 @@ volumes:
   cosmosdb_data: # Named volume declaration
     driver: local 
   rabbitmq_data:  
-    driver: local 
+    driver: local
+  grafana_data:
+    driver: local
 

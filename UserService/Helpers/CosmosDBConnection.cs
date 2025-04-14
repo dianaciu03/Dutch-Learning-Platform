@@ -26,7 +26,10 @@ namespace UserService.Helpers
                     ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
                 }),
                 ConnectionMode = ConnectionMode.Gateway,
-                LimitToEndpoint = true // Critical for emulator stability
+                LimitToEndpoint = true, // Critical for emulator stability
+                RequestTimeout = TimeSpan.FromMinutes(1), // Increase the timeout
+                MaxRetryAttemptsOnRateLimitedRequests = 10, // Retry on rate-limited requests
+                MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.FromSeconds(30) // Wait longer before retrying
             };
 
             // Initialize the Cosmos client

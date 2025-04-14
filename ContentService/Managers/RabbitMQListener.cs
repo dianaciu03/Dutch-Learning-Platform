@@ -18,8 +18,6 @@ namespace ContentService.Managers
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInfo("RabbitMQ Listener Service is starting...");
-
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
