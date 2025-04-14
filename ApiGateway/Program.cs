@@ -42,6 +42,17 @@ namespace ApiGateway
             builder.Services.AddOcelot();
             builder.Logging.AddConsole();
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowFrontend", policy =>
+                {
+                    policy.WithOrigins("http://localhost:3000")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials(); // if you need cookies/auth
+                });
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -51,16 +62,21 @@ namespace ApiGateway
                 app.UseSwaggerUI();
             }
 
+
+            app.UseCors("AllowFrontend");
+            app.UseRouting();
+            app.UseAuthorization();
+
             //app.UseHttpsRedirection();
 
             //// Enable Prometheus scraping at /metrics
-            //app.UseRouting();
+
             //app.UseHttpMetrics(); // middleware that tracks request durations, status codes, etc.
             //                      // Add the /metrics endpoint for Prometheus
 
             //app.MapMetrics();  // This exposes metrics at the /metrics endpoint
 
-            app.UseAuthorization();
+
 
             if (dockerEnv == "true")
             {
@@ -70,6 +86,22 @@ namespace ApiGateway
             }
 
             app.MapControllers();
+
+            app.Use(async (context, next) =>
+            {
+                if (context.Request.Method == HttpMethods.Options)
+                {
+                    context.Response.Headers.Add("Access-Control-Allow-Origin", "http://localhost:3000");
+                    context.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+                    context.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, Authorization");
+                    context.Response.StatusCode = 200;
+                    await context.Response.CompleteAsync();
+                }
+                else
+                {
+                    await next();
+                }
+            });
 
             app.UseOcelot().Wait();
 

@@ -10,7 +10,7 @@
                 }
             ],
             "UpstreamPathTemplate": "/components",
-            "UpstreamHttpMethod": [ "GET", "POST" ]
+            "UpstreamHttpMethod": [ "GET", "POST", "OPTIONS" ]
         },
         {
             "DownstreamPathTemplate": "/api/exams",
@@ -22,7 +22,7 @@
                 }
             ],
             "UpstreamPathTemplate": "/exams",
-            "UpstreamHttpMethod": [ "GET", "POST" ]
+            "UpstreamHttpMethod": [ "GET", "POST", "OPTIONS" ]
         },
         {
             "DownstreamPathTemplate": "/api/exams/{id}",
@@ -34,7 +34,7 @@
                 }
             ],
             "UpstreamPathTemplate": "/exams/{id}",
-            "UpstreamHttpMethod": [ "GET", "PUT", "DELETE" ]
+            "UpstreamHttpMethod": [ "GET", "PUT", "DELETE", "OPTIONS" ]
         },
         {
             "DownstreamPathTemplate": "/api/accounts/student",

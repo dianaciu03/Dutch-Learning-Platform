@@ -30,10 +30,11 @@ namespace ContentService.Managers
         {
             try
             {
-                var examTypes = request.ExamTypes.Select(type => EnumConverter.ParseExamType(type)).ToList();
+                //var examTypes = request.ExamTypes.Select(type => EnumConverter.ParseExamType(type)).ToList();
                 var level = EnumConverter.ParseCEFRLevel(request.Level);
-                var exercise = new ExamPractice(examTypes, level, request.MaxPoints, request.ExamComponents);
-                _exams.Add(exercise);
+                var examPractice = new ExamPractice(request.Name, level, request.MaxPoints);
+                _logger.LogInfo("Empty exam was created", examPractice);
+                _exams.Add(examPractice);
                 return true;
             }
             catch (Exception ex)
@@ -77,7 +78,7 @@ namespace ContentService.Managers
             try
             {
                 _logger.LogInfo("Fetching exam with ID: {0}", id);
-                var exam = _exams.FirstOrDefault(e => e.Id == id);
+                var exam = _exams.FirstOrDefault(e => e.id == id);
                 return new ExamResponse { ExamList = new List<ExamPractice> { exam } };
             }
             catch (Exception ex)
@@ -106,7 +107,7 @@ namespace ContentService.Managers
         {
             try
             {
-                var exam = _exams.FirstOrDefault(e => e.Id == updateExam.Id);
+                var exam = _exams.FirstOrDefault(e => e.id == updateExam.Id);
                 if (exam == null)
                 {
                     return false;
@@ -128,7 +129,7 @@ namespace ContentService.Managers
         {
             try
             {
-                var exam = _exams.FirstOrDefault(e => e.Id == id);
+                var exam = _exams.FirstOrDefault(e => e.id == id);
                 if (exam == null)
                 {
                     _logger.LogWarning("Exam could not be found.");

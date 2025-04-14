@@ -23,6 +23,9 @@ namespace ContentService.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
+            Console.WriteLine("ENDPOINT IS CALLED");
+            Console.WriteLine($"Request body {request}");
+
             bool createdExam = await Task.Run(() => _examManager.CreateExamPractice(request));
 
             if (!createdExam)
