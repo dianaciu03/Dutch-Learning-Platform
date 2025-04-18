@@ -19,6 +19,17 @@ namespace ApiGateway
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowFrontend", policy =>
+                {
+                    policy.WithOrigins("http://localhost:3000")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials(); // if you need cookies/auth
+                });
+            });
+
             // Check if the environment is Docker (from GitHub CI/CD pipeline)
             var dockerEnv = Environment.GetEnvironmentVariable("DOCKER_ENV");
             Console.WriteLine($"DOCKER_ENV: {dockerEnv}");
@@ -42,17 +53,6 @@ namespace ApiGateway
             builder.Services.AddOcelot();
             builder.Logging.AddConsole();
 
-            builder.Services.AddCors(options =>
-            {
-                options.AddPolicy("AllowFrontend", policy =>
-                {
-                    policy.WithOrigins("http://localhost:3000")
-                          .AllowAnyHeader()
-                          .AllowAnyMethod()
-                          .AllowCredentials(); // if you need cookies/auth
-                });
-            });
-
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -63,8 +63,8 @@ namespace ApiGateway
             }
 
 
-            app.UseCors("AllowFrontend");
             app.UseRouting();
+            app.UseCors("AllowFrontend");
             app.UseAuthorization();
 
             //app.UseHttpsRedirection();
@@ -75,8 +75,6 @@ namespace ApiGateway
             //                      // Add the /metrics endpoint for Prometheus
 
             //app.MapMetrics();  // This exposes metrics at the /metrics endpoint
-
-
 
             if (dockerEnv == "true")
             {

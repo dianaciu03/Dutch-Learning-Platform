@@ -61,33 +61,63 @@ namespace ContentService.Managers
             }
         }
 
-        public ComponentResponse CreateExamComponent(CreateExamComponentRequest request)
+        public async Task<string?> CreateReadingComponentAsync(CreateReadingComponentRequest request)
         {
             try
             {
-                ExamType type = EnumConverter.ParseExamType(request.ComponentType);
+                // Create the reading component from the request
+                IExamComponent readingComponent = new ReadingComponent(request.ExamId, request.Text, request.Questions);
 
-                IExamComponent component = type switch
+                // If request includes an ID, assign it
+                if (!string.IsNullOrWhiteSpace(request.id))
                 {
-                    ExamType.Reading => new ReadingComponent(),
-                    ExamType.Vocabulary => new VocabularyComponent(),
-                    ExamType.Listening => new ListeningComponent(),
-                    ExamType.Writing => new WritingComponent(),
-                    ExamType.Speaking => new SpeakingComponent(),
-                    ExamType.Grammar => new GrammarComponent(),
-                    _ => throw new ArgumentException($"Unsupported exam type: {request.ComponentType}")
-                };
+                    readingComponent.id = request.id;
+                }
 
-                return new ComponentResponse { Component = component };
+                // Save using your repository method
+                var savedId = await _examPracticeRepository.SaveExamComponentAsync(readingComponent);
+
+                if (savedId == null)
+                {
+                    _logger.LogWarning("Reading component could not be created or updated.");
+                    return null;
+                }
+
+                _logger.LogInfo("Reading component was created or updated: {0}", savedId);
+                return savedId;
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error while creating exam component.", ex);
-                return new ComponentResponse { Component = null };
+                _logger.LogError("Error while processing reading component.", ex);
+                return null;
             }
-
-
         }
+
+        //public ComponentResponse CreateExamComponent(CreateReadingComponentRequest request)
+        //{
+        //    try
+        //    {
+        //        ExamType type = EnumConverter.ParseExamType(request.ComponentType);
+
+        //        IExamComponent component = type switch
+        //        {
+        //            ExamType.Reading => new ReadingComponent(),
+        //            ExamType.Vocabulary => new VocabularyComponent(),
+        //            ExamType.Listening => new ListeningComponent(),
+        //            ExamType.Writing => new WritingComponent(),
+        //            ExamType.Speaking => new SpeakingComponent(),
+        //            ExamType.Grammar => new GrammarComponent(),
+        //            _ => throw new ArgumentException($"Unsupported exam type: {request.ComponentType}")
+        //        };
+
+        //        return new ComponentResponse { Component = component };
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError("Error while creating exam component.", ex);
+        //        return new ComponentResponse { Component = null };
+        //    }
+        //}
 
         // Read
         public ExamResponse GetExamPracticeById(int id)

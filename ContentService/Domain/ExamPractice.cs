@@ -5,6 +5,7 @@ using System.Text;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
 using ContentService.Interfaces;
+using ContentService.Helpers;
 
 namespace ContentService.Domain
 {
@@ -13,11 +14,10 @@ namespace ContentService.Domain
         public string id { get; set; }
         public int TeacherId { get; set; }
         public string Name { get; set; } 
-        public List<ExamType> ExamTypes { get; set; }
         public CEFRLevel Level { get; set; } 
-        public int MaxPoints { get; set; } 
+        public int MaxPoints { get; set; }
 
-        public IEnumerable<IExamComponent> ExamComponents { get; set; }
+        public List<IExamComponent>? ExamComponents { get; set; }
 
         [JsonConstructor]
         public ExamPractice(string name, CEFRLevel level, int maxPoints)
@@ -25,7 +25,7 @@ namespace ContentService.Domain
             Name = name;
             Level = level;
             MaxPoints = maxPoints;
-            ExamComponents = [];
+            ExamComponents = new List<IExamComponent>();
         }
     }
 }

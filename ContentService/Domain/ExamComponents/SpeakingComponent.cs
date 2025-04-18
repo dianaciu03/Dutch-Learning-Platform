@@ -9,8 +9,10 @@ namespace ContentService.Domain.ExamComponents
 {
     public class SpeakingComponent : IExamComponent
     {
-        public SpeakingComponent()
-        {
-        }
+        public string id { get; set; }
+        public string? ExamId { get; set; }
+        public ComponentType ComponentType { get; } = ComponentType.Reading;
+
+        public ComponentType GetComponentType() => ComponentType;
     }
 }

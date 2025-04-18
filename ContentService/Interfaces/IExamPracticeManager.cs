@@ -11,7 +11,7 @@ namespace ContentService.Interfaces
     public interface IExamPracticeManager
     {
         Task<string?> CreateExamPracticeAsync(CreateExamRequest request);
-        ComponentResponse CreateExamComponent(CreateExamComponentRequest request);
+        Task<string?> CreateReadingComponentAsync(CreateReadingComponentRequest request);
         ExamResponse GetExamPracticeById(int id);
         ExamResponse GetAllExamPractices();
         bool UpdateExamPractice(UpdateExamRequest request);

@@ -4,33 +4,29 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ContentService.Interfaces;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace ContentService.Domain.ExamComponents
 {
     public class ReadingComponent : IExamComponent
     {
+        public string? id { get; set; }
+        public string ExamId { get; set; }
         public string GivenText { get; private set; }
-        public List<string> Questions { get; private set; }
+        public List<QuestionAnswerTuple> Questions { get; private set; }
 
-        public ReadingComponent()
-        {
-        }
+        [JsonConverter(typeof(StringEnumConverter))]
+        public ComponentType ComponentType { get; } = ComponentType.Reading;
 
-        public ReadingComponent(string givenText, List<string> questions)
+        public ReadingComponent() { }
+
+        public ReadingComponent(string examId, string givenText, List<QuestionAnswerTuple> questions)
         {
+            ExamId = examId;
             GivenText = givenText;
             Questions = questions;
         }
-
-        public void Display()
-        {
-            Console.WriteLine("\n~ Reading Section ~");
-            Console.WriteLine($"\n {GivenText}");
-            Console.WriteLine("\nQuestions:");
-            for (int i = 0; i < Questions.Count; i++)
-            {
-                Console.WriteLine($"\n{i + 1}. {Questions[i]}");
-            }
-        }
+        public ComponentType GetComponentType() => ComponentType;
     }
 }

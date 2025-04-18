@@ -1,9 +1,11 @@
 
+using System.Text.Json;
 using ContentService.Helpers;
 using ContentService.Interfaces;
 using ContentService.Managers;
 using ContentService.Repositories;
 using DotNetEnv;
+using Newtonsoft.Json;
 using Prometheus;
 
 namespace ContentService
@@ -31,7 +33,12 @@ namespace ContentService
                 Env.Load(envFilePath);
             }
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                });
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -118,6 +125,14 @@ namespace ContentService
             }
 
             app.MapControllers();
+
+            //// Register custom JSON settings globally for Newtonsoft (used by CosmosDB)
+            //JsonConvert.DefaultSettings = () => new JsonSerializerSettings
+            //{
+            //    Converters = { new ExamComponentConverter() },
+            //    NullValueHandling = NullValueHandling.Ignore,
+            //    TypeNameHandling = TypeNameHandling.None
+            //};
 
             app.Run();
         }

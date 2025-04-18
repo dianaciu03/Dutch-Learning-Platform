@@ -21,8 +21,7 @@ namespace ContentService.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateExamPractice([FromBody] CreateExamRequest request)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
             Console.WriteLine("ENDPOINT IS CALLED");
             Console.WriteLine($"Request body {request}");
@@ -37,19 +36,19 @@ namespace ContentService.Controllers
             return Ok(new { message = "Exam practice created successfully.", id = examId });
         }
 
-        [HttpPost("components")]
-        public async Task<IActionResult> CreateExamComponent([FromBody] CreateExamComponentRequest request)
+        [HttpPost("reading")]
+        public async Task<IActionResult> CreateReadingComponent([FromBody] CreateReadingComponentRequest request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var createdComponent = await Task.Run(() => _examManager.CreateExamComponent(request));
+            var componentId = await _examManager.CreateReadingComponentAsync(request);
 
-            if (createdComponent == null)
+            if (componentId == null)
             {
                 return StatusCode(500, "A problem happened while handling your request.");
             }
 
-            return Ok(createdComponent);
+            return Ok(new { message = "Reading component created successfully.", id = componentId });
         }
 
         // Read
