@@ -12,10 +12,5 @@ namespace ContentService.Domain.ExamComponents
         public WritingComponent()
         {
         }
-
-        public void Display()
-        {
-            Console.WriteLine("Writing Component");
-        }
     }
 }

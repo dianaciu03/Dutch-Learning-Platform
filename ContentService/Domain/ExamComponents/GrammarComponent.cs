@@ -12,10 +12,5 @@ namespace ContentService.Domain.ExamComponents
         public GrammarComponent()
         {
         }
-
-        public void Display()
-        {
-            Console.WriteLine("Displaying Grammar Component");
-        }
     }
 }

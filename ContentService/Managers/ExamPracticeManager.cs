@@ -18,11 +18,13 @@ namespace ContentService.Managers
         private readonly RabbitMQConnection _rabbitMqConnection;
         private readonly List<ExamPractice> _exams = [];
         private readonly LogHelper<ExamPracticeManager> _logger;
+        private readonly IExamPracticeRepository _examPracticeRepository;
 
-        public ExamPracticeManager(RabbitMQConnection rabbitMqConnection)
+        public ExamPracticeManager(RabbitMQConnection rabbitMqConnection, IExamPracticeRepository examPracticeRepository)
         {
             _rabbitMqConnection = rabbitMqConnection;
             _logger = new LogHelper<ExamPracticeManager>();
+            _examPracticeRepository = examPracticeRepository;
         }
 
         // Create
@@ -33,8 +35,10 @@ namespace ContentService.Managers
                 //var examTypes = request.ExamTypes.Select(type => EnumConverter.ParseExamType(type)).ToList();
                 var level = EnumConverter.ParseCEFRLevel(request.Level);
                 var examPractice = new ExamPractice(request.Name, level, request.MaxPoints);
-                _logger.LogInfo("Empty exam was created", examPractice);
-                _exams.Add(examPractice);
+                _examPracticeRepository.SaveExamPracticeAsync(examPractice);
+               
+                _logger.LogInfo("Empty exam was created: {0}", examPractice.Name);
+
                 return true;
             }
             catch (Exception ex)
@@ -78,8 +82,8 @@ namespace ContentService.Managers
             try
             {
                 _logger.LogInfo("Fetching exam with ID: {0}", id);
-                var exam = _exams.FirstOrDefault(e => e.id == id);
-                return new ExamResponse { ExamList = new List<ExamPractice> { exam } };
+                //var exam = _exams.FirstOrDefault(e => e.id == id);
+                return new ExamResponse { ExamList = new List<ExamPractice> {  } };
             }
             catch (Exception ex)
             {
@@ -107,14 +111,14 @@ namespace ContentService.Managers
         {
             try
             {
-                var exam = _exams.FirstOrDefault(e => e.id == updateExam.Id);
+                var exam = 0; //= _exams.FirstOrDefault(e => e.id == updateExam.Id);
                 if (exam == null)
                 {
                     return false;
                 }
-                exam.ExamTypes = updateExam.ExamTypes.Select(type => EnumConverter.ParseExamType(type)).ToList();
-                exam.Level = EnumConverter.ParseCEFRLevel(updateExam.Level);
-                exam.ExamComponents = updateExam.ExamComponents;
+                //exam.ExamTypes = updateExam.ExamTypes.Select(type => EnumConverter.ParseExamType(type)).ToList();
+                //exam.Level = EnumConverter.ParseCEFRLevel(updateExam.Level);
+                //exam.ExamComponents = updateExam.ExamComponents;
                 return true;
             }
             catch (Exception ex)
@@ -129,13 +133,13 @@ namespace ContentService.Managers
         {
             try
             {
-                var exam = _exams.FirstOrDefault(e => e.id == id);
+                //var exam = _exams.FirstOrDefault(e => e.id == id);
+                var exam = 0;
                 if (exam == null)
                 {
                     _logger.LogWarning("Exam could not be found.");
                     return false;
                 }
-                _exams.Remove(exam);
                 return true;
             }
             catch (Exception ex)

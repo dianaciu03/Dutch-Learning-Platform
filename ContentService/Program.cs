@@ -2,6 +2,7 @@
 using ContentService.Helpers;
 using ContentService.Interfaces;
 using ContentService.Managers;
+using ContentService.Repositories;
 using DotNetEnv;
 using Prometheus;
 
@@ -52,6 +53,39 @@ namespace ContentService
             });
 
             builder.Services.AddHostedService<RabbitMQListener>();
+
+            // Register CosmosDBConnection as a Singleton
+            builder.Services.AddSingleton<CosmosDBConnection>(sp =>
+            {
+                string connectionString = Environment.GetEnvironmentVariable($"{envPrefix}COSMOSDB_CONNECTION_STRING");
+
+                // Check if the connection string is empty or null
+                if (string.IsNullOrEmpty(connectionString))
+                {
+                    throw new InvalidOperationException("Cosmos DB connection string is not set.");
+                }
+
+                // Return the CosmosDB connection with the appropriate connection string
+                return new CosmosDBConnection(connectionString);
+            });
+
+            // Register AccountRepository as implementation for IAccountRepository
+            builder.Services.AddScoped<IExamPracticeRepository, ExamPracticeRepository>(sp =>
+            {
+                // Resolve CosmosDBConnection from DI container
+                var cosmosDBConnection = sp.GetRequiredService<CosmosDBConnection>();
+
+                string databaseName = Environment.GetEnvironmentVariable($"{envPrefix}COSMOSDB_DATABASE_NAME");
+                string containerName = Environment.GetEnvironmentVariable($"{envPrefix}COSMOSDB_CONTAINER_NAME_CONTENT_SERVICE");
+
+                if (string.IsNullOrEmpty(databaseName) || string.IsNullOrEmpty(containerName))
+                {
+                    throw new InvalidOperationException("Cosmos DB database or container name is not set.");
+                }
+
+                // Instantiate and return AccountRepository with dynamic database and container names
+                return new ExamPracticeRepository(cosmosDBConnection, databaseName, containerName);
+            });
 
             // Add services to the container
             builder.Services.AddScoped(typeof(LogHelper<>));

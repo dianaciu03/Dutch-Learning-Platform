@@ -12,9 +12,5 @@ namespace ContentService.Domain.ExamComponents
         public ListeningComponent()
         {
         }
-        public void Display()
-        {
-            Console.WriteLine("Listening Component");
-        }
     }
 }

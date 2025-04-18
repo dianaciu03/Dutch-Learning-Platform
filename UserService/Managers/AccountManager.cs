@@ -40,7 +40,7 @@ namespace UserService.Managers
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error creating teacher account", ex);
+                _logger.LogError("Error creating teacher account.", ex);
                 return false;
             }
         }

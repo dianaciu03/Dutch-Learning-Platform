@@ -12,9 +12,5 @@ namespace ContentService.Domain.ExamComponents
         public SpeakingComponent()
         {
         }
-        public void Display()
-        {
-            Console.WriteLine("Speaking Component");
-        }
     }
 }
