@@ -21,19 +21,20 @@ namespace ContentService.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateExamPractice([FromBody] CreateExamRequest request)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
             Console.WriteLine("ENDPOINT IS CALLED");
             Console.WriteLine($"Request body {request}");
 
-            bool createdExam = await Task.Run(() => _examManager.CreateExamPractice(request));
+            var examId = await _examManager.CreateExamPracticeAsync(request);
 
-            if (!createdExam)
+            if (examId == null)
             {
                 return StatusCode(500, "A problem happened while handling your request.");
             }
 
-            return Ok("Exam practice created successfully.");
+            return Ok(new { message = "Exam practice created successfully.", id = examId });
         }
 
         [HttpPost("components")]

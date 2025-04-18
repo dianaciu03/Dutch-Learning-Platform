@@ -16,18 +16,26 @@ namespace ContentService.Repositories
             _container = cosmosDBConnection.GetContainerAsync(databaseName, containerName).Result;
         }
 
-        public async Task SaveExamPracticeAsync(ExamPractice exam)
+        public async Task<string?> SaveExamPracticeAsync(ExamPractice exam)
         {
             try
             {
-                var id = Guid.NewGuid().ToString();
-                exam.id = id;
-                await _container.CreateItemAsync(exam, new PartitionKey(exam.id));
-                Console.WriteLine($"The exam with id {exam.id} was saved successfully.");
+                // Use existing id or generate a new one if not provided
+                if (string.IsNullOrWhiteSpace(exam.id))
+                {
+                    exam.id = Guid.NewGuid().ToString();
+                }
+
+                // Upsert (create or update)
+                var response = await _container.UpsertItemAsync(exam, new PartitionKey(exam.id));
+
+                Console.WriteLine($"Exam with id {exam.id} was upserted successfully. Status code: {response.StatusCode}");
+                return exam.id;
             }
             catch (CosmosException ex)
             {
-                Console.WriteLine($"Error saving exam practice: {ex.Message}");
+                Console.WriteLine($"Error upserting exam practice: {ex.Message}");
+                return null;
             }
         }
     }

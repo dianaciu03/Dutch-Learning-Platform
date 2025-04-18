@@ -28,23 +28,36 @@ namespace ContentService.Managers
         }
 
         // Create
-        public bool CreateExamPractice(CreateExamRequest request)
+        public async Task<string?> CreateExamPracticeAsync(CreateExamRequest request)
         {
             try
             {
-                //var examTypes = request.ExamTypes.Select(type => EnumConverter.ParseExamType(type)).ToList();
                 var level = EnumConverter.ParseCEFRLevel(request.Level);
-                var examPractice = new ExamPractice(request.Name, level, request.MaxPoints);
-                _examPracticeRepository.SaveExamPracticeAsync(examPractice);
-               
-                _logger.LogInfo("Empty exam was created: {0}", examPractice.Name);
 
-                return true;
+                // Create the exam object
+                var examPractice = new ExamPractice(request.Name, level, request.MaxPoints);
+
+                // If request includes an ID, assign it
+                if (!string.IsNullOrWhiteSpace(request.id))
+                {
+                    examPractice.id = request.id;
+                }
+
+                var id = await _examPracticeRepository.SaveExamPracticeAsync(examPractice);
+
+                if (id == null)
+                {
+                    _logger.LogWarning("Exam could not be created.");
+                    return null;
+                }
+
+                _logger.LogInfo("Empty exam was updated: {0}", examPractice.Name);
+                return id;
             }
             catch (Exception ex)
             {
                 _logger.LogError("Error while processing exam.", ex);
-                return false;
+                return null;
             }
         }
 

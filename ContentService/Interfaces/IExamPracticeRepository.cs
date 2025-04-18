@@ -4,6 +4,6 @@ namespace ContentService.Interfaces
 {
     public interface IExamPracticeRepository
     {
-        Task SaveExamPracticeAsync(ExamPractice exam);
+        Task<string?> SaveExamPracticeAsync(ExamPractice exam);
     }
 }
