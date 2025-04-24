@@ -11,6 +11,7 @@ namespace ContentService.Interfaces
     {
         string id { get; set; }
         string? ExamId { get; set; }
+        ComponentType ComponentType { get; }
         ComponentType GetComponentType();
     }
 }

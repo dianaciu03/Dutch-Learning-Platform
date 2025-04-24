@@ -52,6 +52,12 @@ namespace ContentService.Repositories
         {
             try
             {
+                // Use existing id or generate a new one if not provided  
+                if (string.IsNullOrWhiteSpace(component.id))
+                {
+                    component.id = Guid.NewGuid().ToString();
+                }
+
                 var componentType = component.GetComponentType().ToString();
 
                 switch (componentType)
@@ -59,7 +65,7 @@ namespace ContentService.Repositories
                     case "Reading":
                         component = component as ReadingComponent ?? throw new InvalidCastException("Invalid ReadingComponent.");
                         break;
-                    // Add more component types here as needed.
+                    // Add more component types here as needed.  
                     default:
                         throw new NotSupportedException($"Unsupported component type: {componentType}");
                 }
@@ -77,13 +83,33 @@ namespace ContentService.Repositories
                     return null;
                 }
 
-                // Add the new component
-                exam.ExamComponents.Add(component);
+                // Ensure ExamComponents is initialized before adding the component  
+                exam.ExamComponents ??= new List<IExamComponent>();
 
-                // Save updated exam using the centralized method
+                // Check if component exists already
+                var index = exam.ExamComponents.FindIndex(c => c.id == component.id);
+
+                if (index >= 0)
+                {
+                    // Replace existing component
+                    exam.ExamComponents[index] = component;
+                }
+                else
+                {
+                    // Add as new component
+                    exam.ExamComponents.Add(component);
+                }
+
+                // Save updated exam using the centralized method  
                 var savedId = await SaveExamPracticeAsync(exam);
 
-                return savedId == null ? null : component.id;
+                if (savedId == null)
+                {
+                    Console.WriteLine("Exam could not be updated with the new component.");
+                    return null;
+                }
+
+                return component.id;
             }
             catch (CosmosException ex)
             {
@@ -101,19 +127,8 @@ namespace ContentService.Repositories
         {
             try
             {
-                var response = await _container.ReadItemAsync<JObject>(examId, new PartitionKey(examId));
-                JObject raw = response.Resource;
-
-                // Deserialize manually with your settings
-                var settings = new JsonSerializerSettings
-                {
-                    Converters = { new ExamComponentConverter() },
-                    NullValueHandling = NullValueHandling.Ignore,
-                    TypeNameHandling = TypeNameHandling.None
-                };
-
-                var exam = raw.ToObject<ExamPractice>(JsonSerializer.Create(settings));
-                return exam;
+                var response = await _container.ReadItemAsync<ExamPractice>(examId, new PartitionKey(examId));
+                return response;
             }
             catch (CosmosException ex)
             {
@@ -125,6 +140,32 @@ namespace ContentService.Repositories
                 Console.WriteLine($"Unexpected error: {ex.Message}");
                 return null;
             }
+        }
+
+        public async Task<IExamComponent?> GetComponentByIdAsync(string examId, string componentId)
+        {
+            var exam = await GetExamPracticeByIdAsync(examId);
+            if (exam?.ExamComponents == null)
+                return null;
+
+            return exam.ExamComponents.FirstOrDefault(c => c.id == componentId);
+        }
+
+        public async Task<List<ExamPractice>> GetAllExamPracticesAsync()
+        {
+            var query = _container.GetItemQueryIterator<ExamPractice>(
+                new QueryDefinition("SELECT * FROM c")
+            );
+
+            var results = new List<ExamPractice>();
+
+            while (query.HasMoreResults)
+            {
+                var response = await query.ReadNextAsync();
+                results.AddRange(response.ToList());
+            }
+
+            return results;
         }
     }
 }

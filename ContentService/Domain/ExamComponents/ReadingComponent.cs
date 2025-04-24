@@ -13,8 +13,8 @@ namespace ContentService.Domain.ExamComponents
     {
         public string? id { get; set; }
         public string ExamId { get; set; }
-        public string GivenText { get; private set; }
-        public List<QuestionAnswerTuple> Questions { get; private set; }
+        public string GivenText { get; set; }
+        public List<QuestionAnswerTuple> Questions { get; set; }
 
         [JsonConverter(typeof(StringEnumConverter))]
         public ComponentType ComponentType { get; } = ComponentType.Reading;

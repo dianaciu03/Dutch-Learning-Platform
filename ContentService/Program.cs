@@ -126,14 +126,6 @@ namespace ContentService
 
             app.MapControllers();
 
-            //// Register custom JSON settings globally for Newtonsoft (used by CosmosDB)
-            //JsonConvert.DefaultSettings = () => new JsonSerializerSettings
-            //{
-            //    Converters = { new ExamComponentConverter() },
-            //    NullValueHandling = NullValueHandling.Ignore,
-            //    TypeNameHandling = TypeNameHandling.None
-            //};
-
             app.Run();
         }
     }

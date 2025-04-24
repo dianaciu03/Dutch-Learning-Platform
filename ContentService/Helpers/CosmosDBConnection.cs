@@ -1,4 +1,5 @@
-﻿using Microsoft.Azure.Cosmos;
+﻿using System.Text.Json;
+using Microsoft.Azure.Cosmos;
 
 namespace ContentService.Helpers
 {
@@ -29,7 +30,11 @@ namespace ContentService.Helpers
                 LimitToEndpoint = true, // Critical for emulator stability
                 RequestTimeout = TimeSpan.FromMinutes(1), // Increase the timeout
                 MaxRetryAttemptsOnRateLimitedRequests = 10, // Retry on rate-limited requests
-                MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.FromSeconds(30) // Wait longer before retrying
+                MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.FromSeconds(30), // Wait longer before retrying,
+                UseSystemTextJsonSerializerWithOptions = new JsonSerializerOptions()
+                {
+                    Converters = { new ExamComponentConverter() }
+                }
             };
 
             // Initialize the Cosmos client

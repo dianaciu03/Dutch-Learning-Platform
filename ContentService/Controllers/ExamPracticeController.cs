@@ -58,7 +58,7 @@ namespace ContentService.Controllers
 
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(string id)
         {
             var examResponse = await Task.Run(() => _examManager.GetExamPracticeById(id));
             return examResponse == null ? NotFound() : Ok(examResponse);
@@ -74,7 +74,7 @@ namespace ContentService.Controllers
 
         // Delete
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteExamPractice(int id)
+        public async Task<IActionResult> DeleteExamPractice(string id)
         {
             await Task.Run(() => _examManager.DeleteExamPractice(id));
             return NoContent();

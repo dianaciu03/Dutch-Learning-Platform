@@ -1,42 +1,33 @@
-﻿using ContentService.Domain.ExamComponents;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+using ContentService.Domain.ExamComponents;
 using ContentService.Domain;
 using ContentService.Interfaces;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
 
 namespace ContentService.Helpers
 {
     public class ExamComponentConverter : JsonConverter<IExamComponent>
     {
-        public override IExamComponent ReadJson(JsonReader reader, Type objectType, IExamComponent? existingValue, bool hasExistingValue, JsonSerializer serializer)
+        public override IExamComponent? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            JObject jo = JObject.Load(reader);
+            using var jsonDoc = JsonDocument.ParseValue(ref reader);
+            var root = jsonDoc.RootElement;
+            var componentType = (ComponentType) root.GetProperty(nameof(IExamComponent.ComponentType)).GetInt32();
 
-            // Avoid re-serializing objects that are already deserialized
-            if (existingValue != null)
-            {
-                return existingValue;
-            }
+            var json = root.GetRawText();
 
-            var componentType = jo["ComponentType"]?.ToString();
-
-            // Switch case based on component type
             return componentType switch
             {
-                "Reading" => jo.ToObject<ReadingComponent>(serializer),
-                "Grammar" => jo.ToObject<GrammarComponent>(serializer),
+                ComponentType.Reading => JsonSerializer.Deserialize<ReadingComponent>(json),
+                ComponentType.Grammar => JsonSerializer.Deserialize<GrammarComponent>(json),
                 // Add other types as needed
                 _ => throw new NotSupportedException($"Unknown component type: {componentType}")
             };
         }
 
-        public override void WriteJson(JsonWriter writer, IExamComponent value, JsonSerializer serializer)
+        public override void Write(Utf8JsonWriter writer, IExamComponent value, JsonSerializerOptions options)
         {
-            serializer.Serialize(writer, value);
+            JsonSerializer.Serialize(writer, value, value.GetType());
         }
-
-        public override bool CanWrite => true;
-
-
     }
 }

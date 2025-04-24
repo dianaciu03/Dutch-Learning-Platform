@@ -16,7 +16,6 @@ namespace ContentService.Managers
     public class ExamPracticeManager : IExamPracticeManager
     {
         private readonly RabbitMQConnection _rabbitMqConnection;
-        private readonly List<ExamPractice> _exams = [];
         private readonly LogHelper<ExamPracticeManager> _logger;
         private readonly IExamPracticeRepository _examPracticeRepository;
 
@@ -93,54 +92,34 @@ namespace ContentService.Managers
             }
         }
 
-        //public ComponentResponse CreateExamComponent(CreateReadingComponentRequest request)
-        //{
-        //    try
-        //    {
-        //        ExamType type = EnumConverter.ParseExamType(request.ComponentType);
-
-        //        IExamComponent component = type switch
-        //        {
-        //            ExamType.Reading => new ReadingComponent(),
-        //            ExamType.Vocabulary => new VocabularyComponent(),
-        //            ExamType.Listening => new ListeningComponent(),
-        //            ExamType.Writing => new WritingComponent(),
-        //            ExamType.Speaking => new SpeakingComponent(),
-        //            ExamType.Grammar => new GrammarComponent(),
-        //            _ => throw new ArgumentException($"Unsupported exam type: {request.ComponentType}")
-        //        };
-
-        //        return new ComponentResponse { Component = component };
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError("Error while creating exam component.", ex);
-        //        return new ComponentResponse { Component = null };
-        //    }
-        //}
-
         // Read
-        public ExamResponse GetExamPracticeById(int id)
+        public ExamResponse GetExamPracticeById(string id)
         {
             try
             {
                 _logger.LogInfo("Fetching exam with ID: {0}", id);
-                //var exam = _exams.FirstOrDefault(e => e.id == id);
-                return new ExamResponse { ExamList = new List<ExamPractice> {  } };
+                var examPractice = _examPracticeRepository.GetExamPracticeByIdAsync(id).Result;
+
+                if (examPractice == null)
+                {
+                    return new ExamResponse { ExamList = new List<ExamPractice>() };
+                }
+
+                return new ExamResponse { ExamList = new List<ExamPractice> { examPractice } };
             }
             catch (Exception ex)
             {
                 _logger.LogError("Error while fetching exam.", ex);
                 return new ExamResponse { ExamList = new List<ExamPractice>() };
             }
-
         }
 
         public ExamResponse GetAllExamPractices()
         {
             try
             {
-                return new ExamResponse { ExamList = _exams };
+                var examPractices = _examPracticeRepository.GetAllExamPracticesAsync().Result; // Await the task to get the result  
+                return new ExamResponse { ExamList = examPractices }; // Map the result to ExamResponse  
             }
             catch (Exception ex)
             {
@@ -172,7 +151,7 @@ namespace ContentService.Managers
         }
 
         // Delete
-        public bool DeleteExamPractice(int id)
+        public bool DeleteExamPractice(string id)
         {
             try
             {
