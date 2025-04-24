@@ -20,12 +20,12 @@ namespace ContentService.Domain
     {
         private static readonly Dictionary<CEFRLevel, string> CEFRLevelNames = new()
         {
-            { CEFRLevel.A1, "A1 - beginner" },
-            { CEFRLevel.A2, "A2 - elementary" },
-            { CEFRLevel.B1, "B1 - intermediate" },
-            { CEFRLevel.B2, "B2 - upper-intermediate" },
-            { CEFRLevel.C1, "C1 - advanced" },
-            { CEFRLevel.C2, "C2 - proficiency" }
+            { CEFRLevel.A1, "A1 - Beginner" },
+            { CEFRLevel.A2, "A2 - Elementary" },
+            { CEFRLevel.B1, "B1 - Intermediate" },
+            { CEFRLevel.B2, "B2 - Upper-Intermediate" },
+            { CEFRLevel.C1, "C1 - Advanced" },
+            { CEFRLevel.C2, "C2 - Proficiency" }
         };
 
         public static string GetName(this CEFRLevel level)

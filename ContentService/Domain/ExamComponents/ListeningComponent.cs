@@ -9,12 +9,10 @@ namespace ContentService.Domain.ExamComponents
 {
     public class ListeningComponent : IExamComponent
     {
-        public ListeningComponent()
-        {
-        }
-        public void Display()
-        {
-            Console.WriteLine("Listening Component");
-        }
+        public string id { get; set; }
+        public string? ExamId { get; set; }
+        public ComponentType ComponentType { get; } = ComponentType.Listening;
+
+        public ComponentType GetComponentType() => ComponentType;
     }
 }

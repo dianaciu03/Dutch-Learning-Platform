@@ -1,7 +1,7 @@
 ﻿{
     "Routes": [
         {
-            "DownstreamPathTemplate": "/api/exams/components",
+            "DownstreamPathTemplate": "/api/exams/reading",
             "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
@@ -9,7 +9,7 @@
                     "Port": 8082
                 }
             ],
-            "UpstreamPathTemplate": "/components",
+            "UpstreamPathTemplate": "/reading",
             "UpstreamHttpMethod": [ "GET", "POST" ]
         },
         {

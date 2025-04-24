@@ -19,6 +19,17 @@ namespace ApiGateway
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowFrontend", policy =>
+                {
+                    policy.WithOrigins("http://localhost:3000")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials(); // if you need cookies/auth
+                });
+            });
+
             // Check if the environment is Docker (from GitHub CI/CD pipeline)
             var dockerEnv = Environment.GetEnvironmentVariable("DOCKER_ENV");
             Console.WriteLine($"DOCKER_ENV: {dockerEnv}");
@@ -51,16 +62,19 @@ namespace ApiGateway
                 app.UseSwaggerUI();
             }
 
+
+            app.UseRouting();
+            app.UseCors("AllowFrontend");
+            app.UseAuthorization();
+
             //app.UseHttpsRedirection();
 
             //// Enable Prometheus scraping at /metrics
-            //app.UseRouting();
+
             //app.UseHttpMetrics(); // middleware that tracks request durations, status codes, etc.
             //                      // Add the /metrics endpoint for Prometheus
 
             //app.MapMetrics();  // This exposes metrics at the /metrics endpoint
-
-            app.UseAuthorization();
 
             if (dockerEnv == "true")
             {
@@ -70,6 +84,22 @@ namespace ApiGateway
             }
 
             app.MapControllers();
+
+            app.Use(async (context, next) =>
+            {
+                if (context.Request.Method == HttpMethods.Options)
+                {
+                    context.Response.Headers.Add("Access-Control-Allow-Origin", "http://localhost:3000");
+                    context.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+                    context.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, Authorization");
+                    context.Response.StatusCode = 200;
+                    await context.Response.CompleteAsync();
+                }
+                else
+                {
+                    await next();
+                }
+            });
 
             app.UseOcelot().Wait();
 

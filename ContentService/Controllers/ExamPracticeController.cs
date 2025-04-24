@@ -23,29 +23,32 @@ namespace ContentService.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            bool createdExam = await Task.Run(() => _examManager.CreateExamPractice(request));
+            Console.WriteLine("ENDPOINT IS CALLED");
+            Console.WriteLine($"Request body {request}");
 
-            if (!createdExam)
+            var examId = await _examManager.CreateExamPracticeAsync(request);
+
+            if (examId == null)
             {
                 return StatusCode(500, "A problem happened while handling your request.");
             }
 
-            return Ok("Exam practice created successfully.");
+            return Ok(new { message = "Exam practice created successfully.", id = examId });
         }
 
-        [HttpPost("components")]
-        public async Task<IActionResult> CreateExamComponent([FromBody] CreateExamComponentRequest request)
+        [HttpPost("reading")]
+        public async Task<IActionResult> CreateReadingComponent([FromBody] CreateReadingComponentRequest request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var createdComponent = await Task.Run(() => _examManager.CreateExamComponent(request));
+            var componentId = await _examManager.CreateReadingComponentAsync(request);
 
-            if (createdComponent == null)
+            if (componentId == null)
             {
                 return StatusCode(500, "A problem happened while handling your request.");
             }
 
-            return Ok(createdComponent);
+            return Ok(new { message = "Reading component created successfully.", id = componentId });
         }
 
         // Read
@@ -55,7 +58,7 @@ namespace ContentService.Controllers
 
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(string id)
         {
             var examResponse = await Task.Run(() => _examManager.GetExamPracticeById(id));
             return examResponse == null ? NotFound() : Ok(examResponse);
@@ -71,7 +74,7 @@ namespace ContentService.Controllers
 
         // Delete
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteExamPractice(int id)
+        public async Task<IActionResult> DeleteExamPractice(string id)
         {
             await Task.Run(() => _examManager.DeleteExamPractice(id));
             return NoContent();

@@ -10,12 +10,12 @@ namespace ContentService.Interfaces
 {
     public interface IExamPracticeManager
     {
-        bool CreateExamPractice(CreateExamRequest request);
-        ComponentResponse CreateExamComponent(CreateExamComponentRequest request);
-        ExamResponse GetExamPracticeById(int id);
+        Task<string?> CreateExamPracticeAsync(CreateExamRequest request);
+        Task<string?> CreateReadingComponentAsync(CreateReadingComponentRequest request);
+        ExamResponse GetExamPracticeById(string id);
         ExamResponse GetAllExamPractices();
         bool UpdateExamPractice(UpdateExamRequest request);
-        bool DeleteExamPractice(int id);
+        bool DeleteExamPractice(string id);
         Task StartListeningAsync();
     }
 }

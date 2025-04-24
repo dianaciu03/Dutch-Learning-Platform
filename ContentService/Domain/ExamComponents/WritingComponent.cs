@@ -9,13 +9,10 @@ namespace ContentService.Domain.ExamComponents
 {
     public class WritingComponent : IExamComponent
     {
-        public WritingComponent()
-        {
-        }
+        public string id { get; set; }
+        public string? ExamId { get; set; }
+        public ComponentType ComponentType { get; } = ComponentType.Writing;
 
-        public void Display()
-        {
-            Console.WriteLine("Writing Component");
-        }
+        public ComponentType GetComponentType() => ComponentType;
     }
 }
