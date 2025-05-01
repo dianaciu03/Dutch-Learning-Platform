@@ -79,7 +79,7 @@ namespace IntegrationTests.IntegrationTests
             var _connectionString = $"AccountEndpoint=https://{cosmosHost}:{cosmosPort}/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==;";
 
             Environment.SetEnvironmentVariable("INT_TEST_COSMOSDB_DATABASE_NAME", "TestDatabase");
-            Environment.SetEnvironmentVariable("INT_TEST_COSMOSDB_CONTAINER_NAME", "TestUsers");
+            Environment.SetEnvironmentVariable("INT_TEST_COSMOSDB_CONTAINER_NAME_USER_SERVICE", "TestUsers");
             Environment.SetEnvironmentVariable("INT_TEST_COSMOSDB_CONNECTION_STRING", _connectionString);
             
             // Initialize RabbitMQ connection
