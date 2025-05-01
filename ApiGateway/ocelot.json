@@ -9,7 +9,7 @@
                     "Port": 5001
                 }
             ],
-            "UpstreamPathTemplate": "/reading",
+            "UpstreamPathTemplate": "/exams/reading",
             "UpstreamHttpMethod": [ "GET", "POST", "OPTIONS" ]
         },
         {

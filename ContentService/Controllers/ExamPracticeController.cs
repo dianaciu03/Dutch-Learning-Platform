@@ -12,13 +12,13 @@ using Microsoft.AspNetCore.Mvc;
 namespace ContentService.Controllers
 {
     [ApiController]
-    [Route("api/exams")]
+    [Route("api")]
     public class ExamPracticeController(IExamPracticeManager examManager) : ControllerBase
     {
         private readonly IExamPracticeManager _examManager = examManager;
 
         // Create
-        [HttpPost]
+        [HttpPost("exams")]
         public async Task<IActionResult> CreateExamPractice([FromBody] CreateExamRequest request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -36,7 +36,7 @@ namespace ContentService.Controllers
             return Ok(new { message = "Exam practice created successfully.", id = examId });
         }
 
-        [HttpPost("reading")]
+        [HttpPost("exams/reading")]
         public async Task<IActionResult> CreateReadingComponent([FromBody] CreateReadingComponentRequest request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -52,12 +52,12 @@ namespace ContentService.Controllers
         }
 
         // Read
-        [HttpGet]
+        [HttpGet("exams")]
         public async Task<IActionResult> GetAll()
             => Ok(await Task.Run(() => _examManager.GetAllExamPractices()));
 
 
-        [HttpGet("{id}")]
+        [HttpGet("exams/{id}")]
         public async Task<IActionResult> GetById(string id)
         {
             var examResponse = await Task.Run(() => _examManager.GetExamPracticeById(id));
@@ -65,7 +65,7 @@ namespace ContentService.Controllers
         }
 
         // Update
-        [HttpPut("{id}")]
+        [HttpPut("exams/{id}")]
         public async Task<IActionResult> UpdateExamPractice(int id, [FromBody] UpdateExamRequest request)
         {
             await Task.Run(() => _examManager.UpdateExamPractice(request));
@@ -73,7 +73,7 @@ namespace ContentService.Controllers
         }
 
         // Delete
-        [HttpDelete("{id}")]
+        [HttpDelete("exams/{id}")]
         public async Task<IActionResult> DeleteExamPractice(string id)
         {
             await Task.Run(() => _examManager.DeleteExamPractice(id));

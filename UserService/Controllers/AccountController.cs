@@ -7,7 +7,7 @@ using UserService.Managers;
 namespace UserService.Controllers
 {
     [ApiController]
-    [Route("api/accounts")]
+    [Route("api")]
     public class AccountController : ControllerBase
     {
         private readonly IAccountManager _accountManager;
@@ -20,7 +20,7 @@ namespace UserService.Controllers
         }
 
         // Create Teacher Account
-        [HttpPost("teacher")]
+        [HttpPost("accounts/teacher")]
         public async Task<IActionResult> CreateTeacherAccount([FromBody] CreateTeacherAccountRequest request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -30,7 +30,7 @@ namespace UserService.Controllers
         }
 
         // Create Student Account
-        [HttpPost("student")]
+        [HttpPost("accounts/student")]
         public async Task<IActionResult> CreateStudentAccount([FromBody] CreateStudentAccountRequest request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -40,7 +40,7 @@ namespace UserService.Controllers
         }
 
         // Get Account By ID
-        [HttpGet("teacher/{id}")]
+        [HttpGet("accounts/teacher/{id}")]
         public async Task<IActionResult> GetTeacherById(string id)
         {
             try
@@ -62,7 +62,7 @@ namespace UserService.Controllers
         }
 
         // Get Account By ID
-        [HttpGet("student/{id}")]
+        [HttpGet("accounts/student/{id}")]
         public async Task<IActionResult> GetStudentById(string id)
         {
             try
@@ -84,12 +84,12 @@ namespace UserService.Controllers
         }
 
         // Get All Accounts
-        [HttpGet]
+        [HttpGet("accounts")]
         public async Task<IActionResult> GetAll()
             => Ok(await Task.Run(() => _accountManager.GetAllAccounts()));
 
         // Delete Account
-        [HttpDelete("{id}")]
+        [HttpDelete("accounts/{id}")]
         public async Task<IActionResult> DeleteAccount(string id)
         {
             try

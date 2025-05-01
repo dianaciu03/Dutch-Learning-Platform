@@ -9,7 +9,7 @@
                     "Port": 8082
                 }
             ],
-            "UpstreamPathTemplate": "/reading",
+            "UpstreamPathTemplate": "/exams/reading",
             "UpstreamHttpMethod": [ "GET", "POST" ]
         },
         {
