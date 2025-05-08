@@ -22,7 +22,9 @@ namespace ContentService
             // Check if the environment is Docker (from GitHub CI/CD pipeline)
             var dockerEnv = Environment.GetEnvironmentVariable("DOCKER_ENV");
             var integrationTestEnv = Environment.GetEnvironmentVariable("INTEGRATION_TEST_ENV");
-            Console.WriteLine($"DOCKER_ENV: {dockerEnv}");
+            var kubernetesEnv = Environment.GetEnvironmentVariable("KUBERNETES_ENV");
+
+            Console.WriteLine($"DOCKER_ENV: {dockerEnv} or KUBERNETES_ENV: {kubernetesEnv}");
 
             var envPrefix = (dockerEnv == "true") ? "DOCKER_" : (integrationTestEnv == "true") ? "INT_TEST_" : "";
 
@@ -123,6 +125,9 @@ namespace ContentService
                 app.Urls.Add("http://0.0.0.0:8082");
                 //app.Urls.Add("https://0.0.0.0:8083");
             }
+
+            // Add a health endpoint for Kubernetes liveness/readiness probes
+            app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
 
             app.MapControllers();
 
