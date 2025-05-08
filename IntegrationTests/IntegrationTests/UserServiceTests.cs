@@ -117,7 +117,7 @@ namespace IntegrationTests.IntegrationTests
             };
 
             // Act - Send the request to create a teacher
-            var response = await _client.PostAsJsonAsync("/api/accounts/teacher", teacherRequest);
+            var response = await _client.PostAsJsonAsync("/accounts/teacher", teacherRequest);
 
             // Assert - Check if the request was successful
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
