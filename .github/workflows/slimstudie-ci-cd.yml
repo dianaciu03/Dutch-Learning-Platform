@@ -3,6 +3,8 @@ name: CI/CD pipeline for SlimStudie
 on:
   push:
     branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 permissions:
   security-events: write
