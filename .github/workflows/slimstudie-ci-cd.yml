@@ -104,6 +104,9 @@ jobs:
       - name: Add dotnet tools to PATH
         run: echo "${HOME}/.dotnet/tools" >> $GITHUB_PATH
 
+      - name: Install Dependencies
+        run: dotnet restore
+
       - name: Begin SonarCloud Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
