@@ -82,11 +82,13 @@ jobs:
         with:
           sarif_file: snyk.sarif
 
-      - name: Monitor Snyk results
-        run: snyk monitor --file=SlimStudie.sln
+      - name: Monitor project with Snyk
+        uses: snyk/actions@0.4.0
+        with:
+          command: monitor
+          args: --file=SlimStudie.sln
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-
 
   # Job 3: SonarCloud Analysis (parallel to security)
   sonarqube:
