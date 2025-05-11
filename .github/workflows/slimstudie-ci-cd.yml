@@ -78,7 +78,7 @@ jobs:
   
       # Run tests for .csproj projects
       - name: Run Snyk to check for vulnerabilities (Test)
-        if: matrix.project endsWith('.csproj')
+        if: contains(matrix.project, '.csproj')
         uses: snyk/actions@0.4.0
         continue-on-error: true  # Allows the job to continue even if vulnerabilities are found
         with:
@@ -89,7 +89,7 @@ jobs:
   
       # Run tests for Dockerfiles
       - name: Run Snyk to check for vulnerabilities (Test Dockerfile)
-        if: matrix.project endsWith('Dockerfile')
+        if: contains(matrix.project, 'Dockerfile')
         uses: snyk/actions@0.4.0
         continue-on-error: true  # Allows the job to continue even if vulnerabilities are found
         with:
@@ -114,7 +114,6 @@ jobs:
           args: --file=${{ matrix.project }}
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-
 
   # Job 3: SonarCloud Analysis (parallel to security)
   sonarqube:
