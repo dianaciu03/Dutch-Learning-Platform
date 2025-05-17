@@ -32,9 +32,38 @@ namespace ContentService.Managers
             {
                 var examTypes = request.ExamTypes.Select(type => EnumConverter.ParseExamType(type)).ToList();
                 var level = EnumConverter.ParseCEFRLevel(request.Level);
-                var exercise = new ExamPractice(examTypes, level, request.MaxPoints, request.ExamComponents);
-                _exams.Add(exercise);
-                return true;
+
+                if (string.IsNullOrWhiteSpace(request.Name) || request.Name.Length > 100)
+                {
+                    _logger.LogWarning("Invalid exam name provided.");
+                    return null;
+                }
+
+                if (request.MaxPoints <= 0 || request.MaxPoints > 1000)
+                {
+                    _logger.LogWarning("Inavlid number of points provided. The value should be between 0 and 1000.");
+                    return null;
+                }
+
+                // Create the exam object
+                var examPractice = new ExamPractice(request.Name, level, request.MaxPoints);
+
+                // If request includes an ID, assign it
+                if (!string.IsNullOrWhiteSpace(request.id))
+                {
+                    examPractice.id = request.id;
+                }
+
+                var id = await _examPracticeRepository.SaveExamPracticeAsync(examPractice);
+
+                if (id == null)
+                {
+                    _logger.LogWarning("Exam could not be created.");
+                    return null;
+                }
+
+                _logger.LogInfo("Empty exam was updated: {0}", examPractice.Name);
+                return id;
             }
             catch (Exception ex)
             {
@@ -124,23 +153,37 @@ namespace ContentService.Managers
         }
 
         // Delete
-        public bool DeleteExamPractice(int id)
+        public bool DeleteExamPracticeById(string id)
         {
             try
             {
-                var exam = _exams.FirstOrDefault(e => e.Id == id);
-                if (exam == null)
-                {
-                    _logger.LogWarning("Exam could not be found.");
-                    return false;
-                }
-                _exams.Remove(exam);
-                return true;
+                _logger.LogInfo("Deleting exam with ID: {0}", id);
+
+                var success = _examPracticeRepository.DeleteExamPracticeByIdAsync(id).Result;
+
+                return success;
             }
             catch (Exception ex)
             {
                 _logger.LogError("Error while deleting exam.", ex);
                 return false;
+            }
+        }
+
+        public int DeleteAllExamPractices()
+        {
+            try
+            {
+                _logger.LogInfo("Deleting all exams.");
+
+                var deletedCount = _examPracticeRepository.DeleteAllExamPracticesAsync().Result;
+
+                return deletedCount;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error while deleting all exams.", ex);
+                return -1;
             }
         }
 

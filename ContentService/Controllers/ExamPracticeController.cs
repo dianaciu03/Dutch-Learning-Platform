@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using ContentService.Domain;
 using ContentService.DTOs;
 using ContentService.Interfaces;
+using ContentService.Managers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ContentService.Controllers
@@ -23,9 +24,9 @@ namespace ContentService.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            bool createdExam = await Task.Run(() => _examManager.CreateExamPractice(request));
+            var examId = await _examManager.CreateExamPracticeAsync(request);
 
-            if (!createdExam)
+            if (examId == null)
             {
                 return StatusCode(500, "A problem happened while handling your request.");
             }
@@ -71,10 +72,26 @@ namespace ContentService.Controllers
 
         // Delete
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteExamPractice(int id)
+        public IActionResult DeleteExamPracticeById(string id)
         {
-            await Task.Run(() => _examManager.DeleteExamPractice(id));
-            return NoContent();
+            var result = _examManager.DeleteExamPracticeById(id);
+
+            if (result)
+                return Ok(); // 200 OK
+            else
+                return NotFound(); // 404 if not found OR 500 if you want (but usually NotFound for missing items)
         }
+
+        [HttpDelete]
+        public IActionResult DeleteAllExamPractices()
+        {
+            var deletedCount = _examManager.DeleteAllExamPractices();
+
+            if (deletedCount >= 0)
+                return Ok(new { message = $"{deletedCount} exams deleted successfully." }); // 200 OK with message
+            else
+                return StatusCode(500, "An error occurred while deleting exams."); // 500 Internal Server Error
+        }
+
     }
 }
