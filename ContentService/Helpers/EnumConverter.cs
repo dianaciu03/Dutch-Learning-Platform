@@ -9,9 +9,9 @@ namespace ContentService.Helpers
 {
     public static class EnumConverter
     {
-        public static ExamType ParseExamType(string type)
+        public static ComponentType ParseComponentType(string type)
         {
-            if (Enum.TryParse(type, true, out ExamType result))
+            if (Enum.TryParse(type, true, out ComponentType result))
             {
                 return result;
             }

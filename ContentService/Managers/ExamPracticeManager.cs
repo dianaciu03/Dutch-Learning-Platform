@@ -16,21 +16,21 @@ namespace ContentService.Managers
     public class ExamPracticeManager : IExamPracticeManager
     {
         private readonly RabbitMQConnection _rabbitMqConnection;
-        private readonly List<ExamPractice> _exams = [];
         private readonly LogHelper<ExamPracticeManager> _logger;
+        private readonly IExamPracticeRepository _examPracticeRepository;
 
-        public ExamPracticeManager(RabbitMQConnection rabbitMqConnection)
+        public ExamPracticeManager(RabbitMQConnection rabbitMqConnection, IExamPracticeRepository examPracticeRepository)
         {
             _rabbitMqConnection = rabbitMqConnection;
             _logger = new LogHelper<ExamPracticeManager>();
+            _examPracticeRepository = examPracticeRepository;
         }
 
         // Create
-        public bool CreateExamPractice(CreateExamRequest request)
+        public async Task<string?> CreateExamPracticeAsync(CreateExamRequest request)
         {
             try
             {
-                var examTypes = request.ExamTypes.Select(type => EnumConverter.ParseExamType(type)).ToList();
                 var level = EnumConverter.ParseCEFRLevel(request.Level);
 
                 if (string.IsNullOrWhiteSpace(request.Name) || request.Name.Length > 100)
@@ -68,60 +68,70 @@ namespace ContentService.Managers
             catch (Exception ex)
             {
                 _logger.LogError("Error while processing exam.", ex);
-                return false;
+                return null;
             }
         }
 
-        public ComponentResponse CreateExamComponent(CreateExamComponentRequest request)
+        public async Task<string?> CreateReadingComponentAsync(CreateReadingComponentRequest request)
         {
             try
             {
-                ExamType type = EnumConverter.ParseExamType(request.ComponentType);
+                // Create the reading component from the request
+                IExamComponent readingComponent = new ReadingComponent(request.ExamId, request.Text, request.Questions);
 
-                IExamComponent component = type switch
+                // If request includes an ID, assign it
+                if (!string.IsNullOrWhiteSpace(request.id))
                 {
-                    ExamType.Reading => new ReadingComponent(),
-                    ExamType.Vocabulary => new VocabularyComponent(),
-                    ExamType.Listening => new ListeningComponent(),
-                    ExamType.Writing => new WritingComponent(),
-                    ExamType.Speaking => new SpeakingComponent(),
-                    ExamType.Grammar => new GrammarComponent(),
-                    _ => throw new ArgumentException($"Unsupported exam type: {request.ComponentType}")
-                };
+                    readingComponent.id = request.id;
+                }
 
-                return new ComponentResponse { Component = component };
+                // Save using your repository method
+                var savedId = await _examPracticeRepository.SaveExamComponentAsync(readingComponent);
+
+                if (savedId == null)
+                {
+                    _logger.LogWarning("Reading component could not be created or updated.");
+                    return null;
+                }
+
+                _logger.LogInfo("Reading component was created or updated: {0}", savedId);
+                return savedId;
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error while creating exam component.", ex);
-                return new ComponentResponse { Component = null };
+                _logger.LogError("Error while processing reading component.", ex);
+                return null;
             }
-
-
         }
 
         // Read
-        public ExamResponse GetExamPracticeById(int id)
+        public ExamResponse GetExamPracticeById(string id)
         {
             try
             {
                 _logger.LogInfo("Fetching exam with ID: {0}", id);
-                var exam = _exams.FirstOrDefault(e => e.Id == id);
-                return new ExamResponse { ExamList = new List<ExamPractice> { exam } };
+                var examPractice = _examPracticeRepository.GetExamPracticeByIdAsync(id).Result;
+
+                if (examPractice == null)
+                {
+                    return new ExamResponse { ExamList = new List<ExamPractice>() };
+                }
+
+                return new ExamResponse { ExamList = new List<ExamPractice> { examPractice } };
             }
             catch (Exception ex)
             {
                 _logger.LogError("Error while fetching exam.", ex);
                 return new ExamResponse { ExamList = new List<ExamPractice>() };
             }
-
         }
 
         public ExamResponse GetAllExamPractices()
         {
             try
             {
-                return new ExamResponse { ExamList = _exams };
+                var examPractices = _examPracticeRepository.GetAllExamPracticesAsync().Result; // Await the task to get the result  
+                return new ExamResponse { ExamList = examPractices }; // Map the result to ExamResponse  
             }
             catch (Exception ex)
             {
@@ -135,14 +145,14 @@ namespace ContentService.Managers
         {
             try
             {
-                var exam = _exams.FirstOrDefault(e => e.Id == updateExam.Id);
+                var exam = 0; //= _exams.FirstOrDefault(e => e.id == updateExam.Id);
                 if (exam == null)
                 {
                     return false;
                 }
-                exam.ExamTypes = updateExam.ExamTypes.Select(type => EnumConverter.ParseExamType(type)).ToList();
-                exam.Level = EnumConverter.ParseCEFRLevel(updateExam.Level);
-                exam.ExamComponents = updateExam.ExamComponents;
+                //exam.ExamTypes = updateExam.ExamTypes.Select(type => EnumConverter.ParseExamType(type)).ToList();
+                //exam.Level = EnumConverter.ParseCEFRLevel(updateExam.Level);
+                //exam.ExamComponents = updateExam.ExamComponents;
                 return true;
             }
             catch (Exception ex)

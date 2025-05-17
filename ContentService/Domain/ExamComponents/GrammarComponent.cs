@@ -9,13 +9,10 @@ namespace ContentService.Domain.ExamComponents
 {
     public class GrammarComponent : IExamComponent
     {
-        public GrammarComponent()
-        {
-        }
+        public string id { get; set; }
+        public string? ExamId { get; set; }
+        public ComponentType ComponentType { get; } = ComponentType.Grammar;
 
-        public void Display()
-        {
-            Console.WriteLine("Displaying Grammar Component");
-        }
+        public ComponentType GetComponentType() => ComponentType;
     }
 }

@@ -62,16 +62,19 @@ namespace ApiGateway
                 app.UseSwaggerUI();
             }
 
+
+            app.UseRouting();
+            app.UseCors("AllowFrontend");
+            app.UseAuthorization();
+
             //app.UseHttpsRedirection();
 
             //// Enable Prometheus scraping at /metrics
-            //app.UseRouting();
+
             //app.UseHttpMetrics(); // middleware that tracks request durations, status codes, etc.
             //                      // Add the /metrics endpoint for Prometheus
 
             //app.MapMetrics();  // This exposes metrics at the /metrics endpoint
-
-            app.UseAuthorization();
 
             if (dockerEnv == "true")
             {

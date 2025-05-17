@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ContentService.Controllers
 {
     [ApiController]
-    [Route("api/exams")]
+    [Route("exams")]
     public class ExamPracticeController(IExamPracticeManager examManager) : ControllerBase
     {
         private readonly IExamPracticeManager _examManager = examManager;
@@ -31,22 +31,22 @@ namespace ContentService.Controllers
                 return StatusCode(500, "A problem happened while handling your request.");
             }
 
-            return Ok("Exam practice created successfully.");
+            return Ok(new { message = "Exam practice created successfully.", id = examId });
         }
 
-        [HttpPost("components")]
-        public async Task<IActionResult> CreateExamComponent([FromBody] CreateExamComponentRequest request)
+        [HttpPost("reading")]
+        public async Task<IActionResult> CreateReadingComponent([FromBody] CreateReadingComponentRequest request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var createdComponent = await Task.Run(() => _examManager.CreateExamComponent(request));
+            var componentId = await _examManager.CreateReadingComponentAsync(request);
 
-            if (createdComponent == null)
+            if (componentId == null)
             {
                 return StatusCode(500, "A problem happened while handling your request.");
             }
 
-            return Ok(createdComponent);
+            return Ok(new { message = "Reading component created successfully.", id = componentId });
         }
 
         // Read
@@ -56,7 +56,7 @@ namespace ContentService.Controllers
 
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(string id)
         {
             var examResponse = await Task.Run(() => _examManager.GetExamPracticeById(id));
             return examResponse == null ? NotFound() : Ok(examResponse);

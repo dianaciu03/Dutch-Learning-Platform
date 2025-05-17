@@ -79,7 +79,7 @@ namespace IntegrationTests.IntegrationTests
             var _connectionString = $"AccountEndpoint=https://{cosmosHost}:{cosmosPort}/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==;";
 
             Environment.SetEnvironmentVariable("INT_TEST_COSMOSDB_DATABASE_NAME", "TestDatabase");
-            Environment.SetEnvironmentVariable("INT_TEST_COSMOSDB_CONTAINER_NAME", "TestUsers");
+            Environment.SetEnvironmentVariable("INT_TEST_COSMOSDB_CONTAINER_NAME_USER_SERVICE", "TestUsers");
             Environment.SetEnvironmentVariable("INT_TEST_COSMOSDB_CONNECTION_STRING", _connectionString);
             
             // Initialize RabbitMQ connection
@@ -117,7 +117,7 @@ namespace IntegrationTests.IntegrationTests
             };
 
             // Act - Send the request to create a teacher
-            var response = await _client.PostAsJsonAsync("/api/accounts/teacher", teacherRequest);
+            var response = await _client.PostAsJsonAsync("/accounts/teacher", teacherRequest);
 
             // Assert - Check if the request was successful
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);

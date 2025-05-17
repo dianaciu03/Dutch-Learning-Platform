@@ -7,7 +7,7 @@ using UserService.Managers;
 namespace UserService.Controllers
 {
     [ApiController]
-    [Route("api/accounts")]
+    [Route("accounts")]
     public class AccountController : ControllerBase
     {
         private readonly IAccountManager _accountManager;

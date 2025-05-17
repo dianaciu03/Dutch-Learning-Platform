@@ -10,8 +10,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - DOCKER_ENV=true
-    env_file:
-      - .env
+    # env_file:
+    #   - .env
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -32,8 +32,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - DOCKER_ENV=true
-    env_file:
-      - .env
+    # env_file:
+    #   - .env
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -55,8 +55,8 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - DOCKER_OCELOT_CONFIG_PATH=/app/Properties/ocelot.json
       - DOCKER_ENV=true
-    env_file:
-      - .env
+    # env_file:
+    #   - .env
     networks:
       - slimstudie-network
     restart: always

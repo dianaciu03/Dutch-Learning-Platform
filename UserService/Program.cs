@@ -61,7 +61,7 @@ namespace UserService
                 var cosmosDBConnection = sp.GetRequiredService<CosmosDBConnection>();
 
                 string databaseName = Environment.GetEnvironmentVariable($"{envPrefix}COSMOSDB_DATABASE_NAME"); 
-                string containerName = Environment.GetEnvironmentVariable($"{envPrefix}COSMOSDB_CONTAINER_NAME");
+                string containerName = Environment.GetEnvironmentVariable($"{envPrefix}COSMOSDB_CONTAINER_NAME_USER_SERVICE");
 
                 if (string.IsNullOrEmpty(databaseName) || string.IsNullOrEmpty(containerName))
                 {

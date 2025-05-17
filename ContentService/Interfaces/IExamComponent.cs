@@ -3,11 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ContentService.Domain;
 
 namespace ContentService.Interfaces
 {
     public interface IExamComponent
     {
-        //void Display();
+        string id { get; set; }
+        string? ExamId { get; set; }
+        ComponentType ComponentType { get; }
+        ComponentType GetComponentType();
     }
 }

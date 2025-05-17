@@ -1,7 +1,7 @@
 ﻿{
     "Routes": [
         {
-            "DownstreamPathTemplate": "/api/exams/components",
+            "DownstreamPathTemplate": "/exams/reading",
             "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
@@ -9,11 +9,11 @@
                     "Port": 5001
                 }
             ],
-            "UpstreamPathTemplate": "/components",
-            "UpstreamHttpMethod": [ "GET", "POST" ]
+            "UpstreamPathTemplate": "/exams/reading",
+            "UpstreamHttpMethod": [ "GET", "POST", "OPTIONS" ]
         },
         {
-            "DownstreamPathTemplate": "/api/exams",
+            "DownstreamPathTemplate": "/exams",
             "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
@@ -22,10 +22,10 @@
                 }
             ],
             "UpstreamPathTemplate": "/exams",
-            "UpstreamHttpMethod": [ "GET", "POST" ]
+            "UpstreamHttpMethod": [ "GET", "POST", "OPTIONS" ]
         },
         {
-            "DownstreamPathTemplate": "/api/exams/{id}",
+            "DownstreamPathTemplate": "/exams/{id}",
             "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
@@ -34,10 +34,10 @@
                 }
             ],
             "UpstreamPathTemplate": "/exams/{id}",
-            "UpstreamHttpMethod": [ "GET", "PUT", "DELETE" ]
+            "UpstreamHttpMethod": [ "GET", "PUT", "DELETE", "OPTIONS" ]
         },
         {
-            "DownstreamPathTemplate": "/api/accounts/student",
+            "DownstreamPathTemplate": "/accounts/student",
             "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
@@ -49,7 +49,7 @@
             "UpstreamHttpMethod": [ "POST" ]
         },
         {
-            "DownstreamPathTemplate": "/api/accounts/student/{id}",
+            "DownstreamPathTemplate": "/accounts/student/{id}",
             "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
@@ -61,7 +61,7 @@
             "UpstreamHttpMethod": [ "GET" ]
         },
         {
-            "DownstreamPathTemplate": "/api/accounts",
+            "DownstreamPathTemplate": "/accounts",
             "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
@@ -73,7 +73,7 @@
             "UpstreamHttpMethod": [ "GET" ]
         },
         {
-            "DownstreamPathTemplate": "/api/accounts/{id}",
+            "DownstreamPathTemplate": "/accounts/{id}",
             "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
@@ -85,7 +85,7 @@
             "UpstreamHttpMethod": [ "DELETE" ]
         },
         {
-            "DownstreamPathTemplate": "/api/accounts/teacher",
+            "DownstreamPathTemplate": "/accounts/teacher",
             "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
@@ -97,7 +97,7 @@
             "UpstreamHttpMethod": [ "POST" ]
         },
         {
-            "DownstreamPathTemplate": "/api/accounts/teacher/{id}",
+            "DownstreamPathTemplate": "/accounts/teacher/{id}",
             "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {

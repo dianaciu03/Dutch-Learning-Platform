@@ -10,9 +10,9 @@ namespace ContentService.DTOs
 {
     public class CreateExamRequest
     {
-        public required List<string> ExamTypes { get; set; }
+        public string? id { get; set; } 
+        public required string Name { get; set; }
         public required string Level { get; set; }
         public required int MaxPoints { get; set; }
-        public required List<IExamComponent> ExamComponents { get; set; }
     }
 }
