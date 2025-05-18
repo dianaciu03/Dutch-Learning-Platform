@@ -103,6 +103,7 @@ namespace IntegrationTests.IntegrationTests
 
 
         [Fact]
+        [Trait("Category", "Integration")]
         public async Task CreateTeacherAccount_ShouldSucceed_AndBeSavedInDatabase()
         {
             // Arrange - Create a teacher account request
