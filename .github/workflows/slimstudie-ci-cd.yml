@@ -46,7 +46,7 @@ jobs:
         name: build-output
         path: |
           publish/
-          publish/SlimStudie.sln
+          SlimStudie.sln
           publish/obj/project.assets.json
 
   # Job 2: Check Security Vulnerabilities
