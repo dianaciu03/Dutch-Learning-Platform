@@ -154,7 +154,7 @@ jobs:
 
     - name: Run Unit Tests
       run: |
-        dotnet test build-artifacts/SlimStudie.sln --no-build --configuration Release --filter "Category=Unit" --logger trx --results-directory TestResults || echo "No unit tests found."
+        dotnet test build-artifacts/SlimStudie.sln --configuration Release --filter "Category=Unit" --logger trx --results-directory TestResults || echo "No unit tests found."
 
     - name: Upload Unit Test Results
       if: always()
@@ -188,7 +188,7 @@ jobs:
 
     - name: Run Integration Tests
       run: |
-        dotnet test build-artifacts/SlimStudie.sln --no-build --configuration Release --filter "Category=Integration" --logger trx --results-directory TestResults || echo "No integration tests found."
+        dotnet test build-artifacts/SlimStudie.sln --configuration Release --filter "Category=Integration" --logger trx --results-directory TestResults || echo "No integration tests found."
 
     - name: Upload Integration Test Results
       if: always()
