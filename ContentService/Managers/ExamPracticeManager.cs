@@ -33,6 +33,18 @@ namespace ContentService.Managers
             {
                 var level = EnumConverter.ParseCEFRLevel(request.Level);
 
+                if (string.IsNullOrWhiteSpace(request.Name) || request.Name.Length > 100)
+                {
+                    _logger.LogWarning("Invalid exam name provided.");
+                    return null;
+                }
+
+                if (request.MaxPoints <= 0 || request.MaxPoints > 1000)
+                {
+                    _logger.LogWarning("Inavlid number of points provided. The value should be between 0 and 1000.");
+                    return null;
+                }
+
                 // Create the exam object
                 var examPractice = new ExamPractice(request.Name, level, request.MaxPoints);
 
@@ -151,23 +163,37 @@ namespace ContentService.Managers
         }
 
         // Delete
-        public bool DeleteExamPractice(string id)
+        public bool DeleteExamPracticeById(string id)
         {
             try
             {
-                //var exam = _exams.FirstOrDefault(e => e.id == id);
-                var exam = 0;
-                if (exam == null)
-                {
-                    _logger.LogWarning("Exam could not be found.");
-                    return false;
-                }
-                return true;
+                _logger.LogInfo("Deleting exam with ID: {0}", id);
+
+                var success = _examPracticeRepository.DeleteExamPracticeByIdAsync(id).Result;
+
+                return success;
             }
             catch (Exception ex)
             {
                 _logger.LogError("Error while deleting exam.", ex);
                 return false;
+            }
+        }
+
+        public int DeleteAllExamPractices()
+        {
+            try
+            {
+                _logger.LogInfo("Deleting all exams.");
+
+                var deletedCount = _examPracticeRepository.DeleteAllExamPracticesAsync().Result;
+
+                return deletedCount;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error while deleting all exams.", ex);
+                return -1;
             }
         }
 

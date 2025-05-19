@@ -167,5 +167,69 @@ namespace ContentService.Repositories
 
             return results;
         }
+
+        // DELETE
+        public async Task<int> DeleteAllExamPracticesAsync()
+        {
+            try
+            {
+                var query = _container.GetItemQueryIterator<ExamPractice>(
+                    new QueryDefinition("SELECT * FROM c")
+                );
+
+                var examsToDelete = new List<ExamPractice>();
+
+                while (query.HasMoreResults && examsToDelete.Count < 500)
+                {
+                    var response = await query.ReadNextAsync();
+                    examsToDelete.AddRange(response);
+
+                    // Stop if we've gathered 100 items
+                    if (examsToDelete.Count >= 500)
+                    {
+                        examsToDelete = examsToDelete.Take(500).ToList();
+                        break;
+                    }
+                }
+
+                int deleteCount = examsToDelete.Count;
+
+                var deleteTasks = examsToDelete.Select(exam =>
+                    _container.DeleteItemAsync<ExamPractice>(exam.id, new PartitionKey(exam.id))
+                );
+
+                await Task.WhenAll(deleteTasks);
+
+                Console.WriteLine($"Deleted {deleteCount} exams.");
+                return deleteCount;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting first 100 exams: {ex.Message}");
+                return -1;
+            }
+        }
+
+        public async Task<bool> DeleteExamPracticeByIdAsync(string examId)
+        {
+            try
+            {
+                var response = await _container.DeleteItemAsync<ExamPractice>(examId, new PartitionKey(examId));
+                Console.WriteLine($"Deleted exam with ID: {examId}, Status code: {response.StatusCode}");
+                return true;
+            }
+            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                Console.WriteLine($"Exam with ID: {examId} not found.");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Unexpected error while deleting exam: {ex.Message}");
+                return false;
+            }
+        }
+
+
     }
 }

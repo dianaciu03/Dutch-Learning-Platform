@@ -23,7 +23,7 @@ namespace ApiGateway
             {
                 options.AddPolicy("AllowFrontend", policy =>
                 {
-                    policy.WithOrigins("http://localhost:3000")
+                    policy.WithOrigins("http://localhost:3001")
                           .AllowAnyHeader()
                           .AllowAnyMethod()
                           .AllowCredentials(); // if you need cookies/auth
@@ -89,7 +89,8 @@ namespace ApiGateway
             {
                 if (context.Request.Method == HttpMethods.Options)
                 {
-                    context.Response.Headers.Add("Access-Control-Allow-Origin", "http://localhost:3000");
+                    //context.Response.Headers.Add("Access-Control-Allow-Origin", "http://localhost:3000");
+                    context.Response.Headers.Add("Access-Control-Allow-Origin", "http://localhost:3001");
                     context.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
                     context.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, Authorization");
                     context.Response.StatusCode = 200;
