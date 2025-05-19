@@ -31,7 +31,6 @@ jobs:
         key: nuget-${{ runner.os }}-${{ hashFiles('**/packages.lock.json') }}
         restore-keys: |
           nuget-${{ runner.os }}-
-
     - name: Restore Dependencies
       run: dotnet restore
 
@@ -48,7 +47,6 @@ jobs:
           publish/
           SlimStudie.sln
           publish/obj/project.assets.json
-
   # Job 2: Check Security Vulnerabilities
   security:
     name: Run Security Vulnerability Checks
@@ -143,19 +141,18 @@ jobs:
       with:
         dotnet-version: 8.0.x
 
-    - name: Download Build Artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: build-output
-        path: build-artifacts
+    - name: Restore Dependencies
+      run: dotnet restore
+
+    - name: Build Project
+      run: dotnet build --no-restore --configuration Release
 
     - name: Ensure TestResults Directory Exists
       run: mkdir -p TestResults
 
     - name: Run Unit Tests
       run: |
-        dotnet test build-artifacts/SlimStudie.sln --configuration Release --filter "Category=Unit" --logger trx --results-directory TestResults || echo "No unit tests found."
-
+        dotnet test SlimStudie.sln --no-build --configuration Release --filter "Category=Unit" --logger trx --results-directory TestResults || echo "No unit tests found."
     - name: Upload Unit Test Results
       if: always()
       uses: actions/upload-artifact@v4
@@ -167,7 +164,7 @@ jobs:
   integration-tests:
     name: Run Integration Tests
     runs-on: ubuntu-latest
-    needs: unit-tests
+    needs: unit-tests # Runs after unit tests pass
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
@@ -177,19 +174,18 @@ jobs:
       with:
         dotnet-version: 8.0.x
 
-    - name: Download Build Artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: build-output
-        path: build-artifacts
+    - name: Restore Dependencies
+      run: dotnet restore
+
+    - name: Build Project
+      run: dotnet build --no-restore --configuration Release
 
     - name: Ensure TestResults Directory Exists
       run: mkdir -p TestResults
 
     - name: Run Integration Tests
       run: |
-        dotnet test build-artifacts/SlimStudie.sln --configuration Release --filter "Category=Integration" --logger trx --results-directory TestResults || echo "No integration tests found."
-
+        dotnet test SlimStudie.sln --no-build --configuration Release --filter "Category=Integration" --logger trx --results-directory TestResults || echo "No integration tests found."
     - name: Upload Integration Test Results
       if: always()
       uses: actions/upload-artifact@v4
@@ -216,7 +212,6 @@ jobs:
         run: |
           docker build -t my-user-service:latest -f UserService/Dockerfile UserService/
           docker tag my-user-service:latest ${{ secrets.DOCKER_HUB_USERNAME }}/my-user-service:latest
-
       - name: Build Content Service Docker Image
         run: |
           docker build -t my-content-service:latest -f ContentService/Dockerfile ContentService/
@@ -226,7 +221,6 @@ jobs:
         run: |
           docker build -t my-api-gateway:latest -f ApiGateway/Dockerfile ApiGateway/
           docker tag my-api-gateway:latest ${{ secrets.DOCKER_HUB_USERNAME }}/my-api-gateway:latest
-
       - name: Install Docker Compose
         run: sudo apt-get update && sudo apt-get install -y docker-compose
 
@@ -240,7 +234,6 @@ jobs:
           DOCKER_RABBITMQ_PASSWORD: ${{ secrets.DOCKER_RABBITMQ_PASSWORD }}
         run: |
           docker-compose -f docker-compose.yml up -d --build
-
       - name: Push Docker Images
         run: |
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/my-user-service:latest
