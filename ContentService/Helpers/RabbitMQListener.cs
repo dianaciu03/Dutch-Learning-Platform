@@ -2,12 +2,12 @@
 using ContentService.Interfaces;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using Serilog;
 
 namespace ContentService.Helpers
 {
     public class RabbitMQListener : BackgroundService
     {
-        private readonly LogHelper<RabbitMQListener> _logger;
         private readonly RabbitMQConnection _rabbitMqConnection;
         private readonly IServiceScopeFactory _scopeFactory;
         private IChannel _channel;
@@ -17,12 +17,11 @@ namespace ContentService.Helpers
         {
             _scopeFactory = scopeFactory;
             _rabbitMqConnection = rabbitMQConnection;
-            _logger = new LogHelper<RabbitMQListener>();
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInfo("Starting RabbitMQ listener...");
+            Log.Information("Starting RabbitMQ listener...");
 
             _channel = _rabbitMqConnection.GetChannel();
 
@@ -40,7 +39,7 @@ namespace ContentService.Helpers
                 autoAck: true,
                 consumer: consumer);
 
-            _logger.LogInfo("RabbitMQ listener is now consuming messages.");
+            Log.Information("RabbitMQ listener is now consuming messages.");
         }
 
         private async Task HandleMessageAsync(object sender, BasicDeliverEventArgs ea)
@@ -48,7 +47,7 @@ namespace ContentService.Helpers
             var body = ea.Body.ToArray();
             var message = Encoding.UTF8.GetString(body);
 
-            _logger.LogInfo("Received message: {0}", message);
+            Log.Information("Received message: {Message}", message);
 
             try
             {
@@ -58,13 +57,13 @@ namespace ContentService.Helpers
                 var accountId = ExtractAccountId(message);
                 if (accountId.HasValue)
                 {
-                    _logger.LogInfo("Processing Account ID: {0}", accountId);
+                    Log.Information("Processing Account ID: {AccountId}", accountId);
                     // Optional: await examPracticeManager.HandleAccountDeleted(accountId.Value);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error handling message: {0}", ex);
+                Log.Error(ex, "Error handling message");
             }
         }
 
@@ -83,7 +82,7 @@ namespace ContentService.Helpers
 
         public override async Task StopAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInfo("Stopping RabbitMQ listener...");
+            Log.Information("Stopping RabbitMQ listener...");
 
             if (_channel != null)
             {
