@@ -15,13 +15,11 @@ namespace ContentService.Managers
 {
     public class ExamPracticeManager : IExamPracticeManager
     {
-        private readonly RabbitMQConnection _rabbitMqConnection;
         private readonly LogHelper<ExamPracticeManager> _logger;
         private readonly IExamPracticeRepository _examPracticeRepository;
 
-        public ExamPracticeManager(RabbitMQConnection rabbitMqConnection, IExamPracticeRepository examPracticeRepository)
+        public ExamPracticeManager(IExamPracticeRepository examPracticeRepository)
         {
-            _rabbitMqConnection = rabbitMqConnection;
             _logger = new LogHelper<ExamPracticeManager>();
             _examPracticeRepository = examPracticeRepository;
         }
@@ -195,57 +193,6 @@ namespace ContentService.Managers
                 _logger.LogError("Error while deleting all exams.", ex);
                 return -1;
             }
-        }
-
-        public async Task StartListeningAsync()
-        {
-            var channel = _rabbitMqConnection.GetChannel();
-            _logger.LogInfo("Listening to the channel {0}", channel);
-
-            // Declare the queue you want to listen to
-            await channel.QueueDeclareAsync(queue: "accountQueue", durable: true, exclusive: false, autoDelete: false);
-            _logger.LogInfo("Listening to the accountQueue...");
-
-            // Create a consumer
-            var consumer = new AsyncEventingBasicConsumer(channel);
-            consumer.ReceivedAsync += async (model, ea) =>
-            {
-                var body = ea.Body.ToArray();
-                var message = Encoding.UTF8.GetString(body);
-
-                // Extract account id from the message
-                var accountId = ExtractAccountId(message);
-
-                if (accountId.HasValue)
-                {
-                    // Fetch the user data (e.g., GetAllExamsByUserId)
-                    //var content = await _accountRepository.GetAllExamsByUserId(accountId.Value);
-                    _logger.LogInfo("Received the message and it contains the id: {0}", accountId);
-                }
-            };
-
-            // Start listening to the queue
-            await channel.BasicConsumeAsync(queue: "accountQueue", autoAck: true, consumer: consumer);
-
-            //_logger.LogInfo("Content service is listening for messages...");
-        }
-
-        private Guid? ExtractAccountId(string message)
-        {
-            // Assuming the message follows this format: "Account to delete: {id}"
-            if (message.StartsWith("Account to delete:"))
-            {
-                var parts = message.Split(':');
-                if (parts.Length > 1)
-                {
-                    string idPart = parts[1].Trim();
-                    if (Guid.TryParse(idPart, out Guid id))
-                    {
-                        return id;
-                    }
-                }
-            }
-            return null;
         }
     }
 }

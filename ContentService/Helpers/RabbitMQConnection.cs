@@ -35,36 +35,6 @@ namespace ContentService.Helpers
             }
         }
 
-        public void PublishMessage(string message, string queueName)
-        {
-            if (_channel == null)
-            {
-                throw new InvalidOperationException("Channel is not established.");
-            }
-
-            // Ensure the queue exists (optional)
-            _channel.QueueDeclareAsync(queueName, durable: true, exclusive: false, autoDelete: false);
-
-            var body = Encoding.UTF8.GetBytes(message);
-
-            var properties = new BasicProperties
-            {
-                Persistent = true  // Make sure the message is persisted
-            }; 
-
-            // Publish the message to the queue
-            Task.Run(async () =>
-            {
-                await _channel.BasicPublishAsync(exchange: "",
-                                               routingKey: queueName,
-                                               mandatory: false,
-                                               basicProperties: properties,
-                                               body: body);
-
-                _logger.LogInfo("Sent message: {0}", message);
-            });
-        }
-
         public IChannel GetChannel()
         {
             if (_channel == null)
