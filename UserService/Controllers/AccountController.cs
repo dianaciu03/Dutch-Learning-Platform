@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using UserService.DTOs;
-using UserService.Helpers;
 using UserService.Interfaces;
 using UserService.Managers;
+using Serilog;
 
 namespace UserService.Controllers
 {
@@ -11,12 +11,10 @@ namespace UserService.Controllers
     public class AccountController : ControllerBase
     {
         private readonly IAccountManager _accountManager;
-        private readonly LogHelper<AccountController> _logger;
 
-        public AccountController(IAccountManager accountManager, LogHelper<AccountController> logger)
+        public AccountController(IAccountManager accountManager)
         {
             _accountManager = accountManager;
-            _logger = logger;
         }
 
         // Create Teacher Account
@@ -46,40 +44,35 @@ namespace UserService.Controllers
             try
             {
                 var account = await Task.Run(() => _accountManager.GetTeacherAccountById(id));
-
-                if (account == null)
+                if (account.AccountList == null || !account.AccountList.Any())
                 {
-                    return NotFound("Account not found.");
+                    return NotFound($"No teacher account found with ID: {id}");
                 }
-
                 return Ok(account);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"An error occurred while fetching the teacher account with ID {id}: {ex.Message}");
-                return StatusCode(500, "An internal server error occurred.");
+                Log.Error(ex, "An error occurred while fetching the teacher account with ID: {AccountId}", id);
+                return StatusCode(500, "An unexpected error occurred. Please try again later.");
             }
         }
 
-        // Get Account By ID
         [HttpGet("student/{id}")]
         public async Task<IActionResult> GetStudentById(string id)
         {
             try
             {
                 var account = await Task.Run(() => _accountManager.GetStudentAccountById(id));
-
-                if (account == null)
+                if (account.AccountList == null || !account.AccountList.Any())
                 {
-                    return NotFound("Account not found.");
+                    return NotFound($"No student account found with ID: {id}");
                 }
-
                 return Ok(account);
             }
             catch (Exception ex)
             {
-                _logger.LogError("An error occurred while fetching the teacher account with ID.", ex);
-                return StatusCode(500, "An internal server error occurred.");
+                Log.Error(ex, "An error occurred while fetching the student account with ID: {AccountId}", id);
+                return StatusCode(500, "An unexpected error occurred. Please try again later.");
             }
         }
 
@@ -95,17 +88,15 @@ namespace UserService.Controllers
             try
             {
                 bool deleted = await Task.Run(() => _accountManager.DeleteAccount(id));
-
-                if (deleted)
+                if (!deleted)
                 {
-                    return NoContent(); // 204 response, no body
+                    return NotFound($"No account found with ID: {id}");
                 }
-
-                return NotFound("Account not found.");
+                return Ok($"Account with ID: {id} has been deleted successfully.");
             }
             catch (Exception ex)
             {
-                _logger.LogError("An error occurred while deleting the account with ID: {0}", ex);
+                Log.Error(ex, "An error occurred while deleting the account with ID: {AccountId}", id);
                 return StatusCode(500, "An unexpected error occurred. Please try again later.");
             }
         }

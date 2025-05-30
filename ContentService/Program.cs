@@ -1,4 +1,3 @@
-
 using System.Text.Json;
 using ContentService.Helpers;
 using ContentService.Interfaces;
@@ -7,6 +6,7 @@ using ContentService.Repositories;
 using DotNetEnv;
 using Newtonsoft.Json;
 using Prometheus;
+using Serilog;
 
 namespace ContentService
 {
@@ -14,124 +14,128 @@ namespace ContentService
     {
         public static void Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
+            // Configure Serilog
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.Console()
+                .CreateLogger();
 
-            builder.Services.AddLogging();
-
-
-            // Check if the environment is Docker (from GitHub CI/CD pipeline)
-            var dockerEnv = Environment.GetEnvironmentVariable("DOCKER_ENV");
-            var integrationTestEnv = Environment.GetEnvironmentVariable("INTEGRATION_TEST_ENV");
-            var kubernetesEnv = Environment.GetEnvironmentVariable("KUBERNETES_ENV");
-
-            Console.WriteLine($"DOCKER_ENV: {dockerEnv} or KUBERNETES_ENV: {kubernetesEnv}");
-
-            var envPrefix = (dockerEnv == "true") ? "DOCKER_" : (integrationTestEnv == "true") ? "INT_TEST_" : "";
-
-            if (dockerEnv != "true")
+            try
             {
-                // LOCAL ENVIRONMENT
-                var envFilePath = Path.Combine(Directory.GetCurrentDirectory(), "..", ".env");
-                Env.Load(envFilePath);
-            }
+                Log.Information("Starting Content Service...");
+                var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddControllers()
-                .AddJsonOptions(options =>
+                // Add Serilog to the builder
+                builder.Host.UseSerilog();
+
+                // Check if the environment is Docker (from GitHub CI/CD pipeline)
+                var dockerEnv = Environment.GetEnvironmentVariable("DOCKER_ENV");
+                var integrationTestEnv = Environment.GetEnvironmentVariable("INTEGRATION_TEST_ENV");
+                var kubernetesEnv = Environment.GetEnvironmentVariable("KUBERNETES_ENV");
+
+                Log.Information("DOCKER_ENV: {DockerEnv} or KUBERNETES_ENV: {KubernetesEnv}", dockerEnv, kubernetesEnv);
+
+                var envPrefix = (dockerEnv == "true") ? "DOCKER_" : (integrationTestEnv == "true") ? "INT_TEST_" : "";
+
+                if (dockerEnv != "true")
                 {
-                    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                    // LOCAL ENVIRONMENT
+                    var envFilePath = Path.Combine(Directory.GetCurrentDirectory(), "..", ".env");
+                    Env.Load(envFilePath);
+                }
+
+                builder.Services.AddControllers()
+                    .AddJsonOptions(options =>
+                    {
+                        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                    });
+
+                // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+                builder.Services.AddEndpointsApiExplorer();
+                builder.Services.AddSwaggerGen();
+
+                // Register RabbitMQConnection as a Singleton
+                builder.Services.AddSingleton<RabbitMQConnection>(sp =>
+                {
+                    string hostName = Environment.GetEnvironmentVariable($"{envPrefix}RABBITMQ_HOST") ?? "localhost";
+                    string userName = Environment.GetEnvironmentVariable($"{envPrefix}RABBITMQ_USERNAME") ?? "guest";
+                    string password = Environment.GetEnvironmentVariable($"{envPrefix}RABBITMQ_PASSWORD") ?? "guest";
+
+                    return new RabbitMQConnection(hostName, userName, password);
                 });
 
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+                builder.Services.AddHostedService<RabbitMQListener>();
 
-            // Register RabbitMQConnection as a Singleton
-            builder.Services.AddSingleton<RabbitMQConnection>(sp =>
-            {
-                string rabbitMqHost = Environment.GetEnvironmentVariable($"{envPrefix}RABBITMQ_HOST");
-                string rabbitMqUser = Environment.GetEnvironmentVariable($"{envPrefix}RABBITMQ_USER");
-                string rabbitMqPassword = Environment.GetEnvironmentVariable($"{envPrefix}RABBITMQ_PASSWORD");
-
-                if (string.IsNullOrEmpty(rabbitMqHost) || string.IsNullOrEmpty(rabbitMqUser) || string.IsNullOrEmpty(rabbitMqPassword))
+                // Register CosmosDBConnection as a Singleton
+                builder.Services.AddSingleton<CosmosDBConnection>(sp =>
                 {
-                    throw new InvalidOperationException("RabbitMQ connection details are not set.");
+                    string connectionString = Environment.GetEnvironmentVariable($"{envPrefix}COSMOSDB_CONNECTION_STRING");
+                    if (string.IsNullOrEmpty(connectionString))
+                    {
+                        throw new InvalidOperationException("Cosmos DB connection string is not set.");
+                    }
+                    return new CosmosDBConnection(connectionString);
+                });
+
+                // Register AccountRepository as implementation for IAccountRepository
+                builder.Services.AddScoped<IExamPracticeRepository, ExamPracticeRepository>(sp =>
+                {
+                    // Resolve CosmosDBConnection from DI container
+                    var cosmosDBConnection = sp.GetRequiredService<CosmosDBConnection>();
+
+                    string databaseName = Environment.GetEnvironmentVariable($"{envPrefix}COSMOSDB_DATABASE_NAME");
+                    string containerName = Environment.GetEnvironmentVariable($"{envPrefix}COSMOSDB_CONTAINER_NAME_CONTENT_SERVICE");
+
+                    if (string.IsNullOrEmpty(databaseName) || string.IsNullOrEmpty(containerName))
+                    {
+                        throw new InvalidOperationException("Cosmos DB database or container name is not set.");
+                    }
+
+                    // Instantiate and return AccountRepository with dynamic database and container names
+                    return new ExamPracticeRepository(cosmosDBConnection, databaseName, containerName);
+                });
+
+                // Add services to the container
+                builder.Services.AddScoped<IExamPracticeManager, ExamPracticeManager>();
+
+                var app = builder.Build();
+
+                // Configure the HTTP request pipeline.
+                if (app.Environment.IsDevelopment())
+                {
+                    app.UseSwagger();
+                    app.UseSwaggerUI();
                 }
+
+                // Enable Prometheus scraping at /metrics
+                app.UseRouting();
+                app.UseHttpMetrics(); // middleware that tracks request durations, status codes, etc.
+                app.MapMetrics();  // This exposes metrics at the /metrics endpoint
+
+                app.UseHttpsRedirection();
+                app.UseAuthorization();
                 
-                // Return the RabbitMQ connection using the values fetched from the environment variables
-                return new RabbitMQConnection(rabbitMqHost, rabbitMqUser, rabbitMqPassword);
-            });
-
-            builder.Services.AddHostedService<RabbitMQListener>();
-
-            // Register CosmosDBConnection as a Singleton
-            builder.Services.AddSingleton<CosmosDBConnection>(sp =>
-            {
-                string connectionString = Environment.GetEnvironmentVariable($"{envPrefix}COSMOSDB_CONNECTION_STRING");
-
-                // Check if the connection string is empty or null
-                if (string.IsNullOrEmpty(connectionString))
+                if (dockerEnv == "true")
                 {
-                    throw new InvalidOperationException("Cosmos DB connection string is not set.");
+                    // DOCKER ONLY
+                    app.Urls.Add("http://0.0.0.0:8082");
+                    //app.Urls.Add("https://0.0.0.0:8083");
                 }
 
-                // Return the CosmosDB connection with the appropriate connection string
-                return new CosmosDBConnection(connectionString);
-            });
+                // Add a health endpoint for Kubernetes liveness/readiness probes
+                app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
 
-            // Register AccountRepository as implementation for IAccountRepository
-            builder.Services.AddScoped<IExamPracticeRepository, ExamPracticeRepository>(sp =>
-            {
-                // Resolve CosmosDBConnection from DI container
-                var cosmosDBConnection = sp.GetRequiredService<CosmosDBConnection>();
+                app.MapControllers();
 
-                string databaseName = Environment.GetEnvironmentVariable($"{envPrefix}COSMOSDB_DATABASE_NAME");
-                string containerName = Environment.GetEnvironmentVariable($"{envPrefix}COSMOSDB_CONTAINER_NAME_CONTENT_SERVICE");
-
-                if (string.IsNullOrEmpty(databaseName) || string.IsNullOrEmpty(containerName))
-                {
-                    throw new InvalidOperationException("Cosmos DB database or container name is not set.");
-                }
-
-                // Instantiate and return AccountRepository with dynamic database and container names
-                return new ExamPracticeRepository(cosmosDBConnection, databaseName, containerName);
-            });
-
-            // Add services to the container
-            builder.Services.AddScoped(typeof(LogHelper<>));
-            builder.Services.AddScoped<IExamPracticeManager, ExamPracticeManager>();
-
-            var app = builder.Build();
-
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
+                app.Run();
             }
-
-            // Enable Prometheus scraping at /metrics
-            app.UseRouting();
-            app.UseHttpMetrics(); // middleware that tracks request durations, status codes, etc.
-                                  // Add the /metrics endpoint for Prometheus
-
-            app.MapMetrics();  // This exposes metrics at the /metrics endpoint
-
-            //app.UseHttpsRedirection();
-            app.UseAuthorization();
-            
-            if (dockerEnv == "true")
+            catch (Exception ex)
             {
-                // DOCKER ONLY
-                app.Urls.Add("http://0.0.0.0:8082");
-                //app.Urls.Add("https://0.0.0.0:8083");
+                Log.Fatal(ex, "Content Service terminated unexpectedly");
             }
-
-            // Add a health endpoint for Kubernetes liveness/readiness probes
-            app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
-
-            app.MapControllers();
-
-            app.Run();
+            finally
+            {
+                Log.CloseAndFlush();
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Azure.Cosmos;
+using Serilog;
 
 namespace UserService.Helpers
 {
@@ -6,11 +7,9 @@ namespace UserService.Helpers
     {
         private CosmosClient cosmosClient;
         private readonly string _connectionString;
-        private readonly LogHelper<CosmosDBConnection> _logger;
 
         public CosmosDBConnection(string connectionString)
         {
-            _logger = new LogHelper<CosmosDBConnection>();
             // Get the connection string from environment variables
             _connectionString = connectionString;
 
@@ -34,7 +33,7 @@ namespace UserService.Helpers
 
             // Initialize the Cosmos client
             cosmosClient = new CosmosClient(_connectionString, clientOptions: options);
-            _logger.LogInfo("CosmosDB Client instantiated successfully.");
+            Log.Information("CosmosDB Client instantiated successfully");
         }
 
         // Method to get a Cosmos database (Create if not exists)
@@ -44,12 +43,12 @@ namespace UserService.Helpers
             try
             {
                 Database database = await cosmosClient.CreateDatabaseIfNotExistsAsync(databaseName);
-                _logger.LogInfo("Created or retrieved database {0}", database);
+                Log.Information("Created or retrieved database {DatabaseName}", databaseName);
                 return database;
             }
             catch (CosmosException ex)
             {
-                _logger.LogError("Error while creating/getting the database.", ex);
+                Log.Error(ex, "Error while creating/getting the database {DatabaseName}", databaseName);
                 throw;
             }
         }
@@ -64,11 +63,12 @@ namespace UserService.Helpers
 
                 // Now, create the container if it does not exist
                 Container container = await database.CreateContainerIfNotExistsAsync(containerName, partitionKeyPath);
+                Log.Information("Created or retrieved container {ContainerName} in database {DatabaseName}", containerName, databaseName);
                 return container;
             }
             catch (CosmosException ex)
             {
-                _logger.LogError("Error while creating/getting the container.", ex);
+                Log.Error(ex, "Error while creating/getting the container {ContainerName} in database {DatabaseName}", containerName, databaseName);
                 throw;
             }
         }

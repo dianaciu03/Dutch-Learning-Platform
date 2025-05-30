@@ -1,20 +1,18 @@
 ﻿using System.Text;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
-using UserService.Managers;
+using Serilog;
 
 namespace UserService.Helpers
 {
     public class RabbitMQConnection : IDisposable
     {
-        private readonly LogHelper<RabbitMQConnection> _logger;
         private readonly ConnectionFactory _factory;
         private IConnection _connection;
         private IChannel _channel;
 
         public RabbitMQConnection(string hostName, string userName, string password, int? port = null)
         {
-            _logger = new LogHelper<RabbitMQConnection>();
             _factory = new ConnectionFactory
             {
                 HostName = hostName,
@@ -38,11 +36,12 @@ namespace UserService.Helpers
             {
                 _connection = await _factory.CreateConnectionAsync();
                 _channel = await _connection.CreateChannelAsync(); // Newer versions use this
-                _logger.LogInfo("Connected to RabbitMQ.");
+                Log.Information("Connected to RabbitMQ");
             }
             catch (BrokerUnreachableException ex)
             {
-                _logger.LogError("RabbitMQ connection error: {0}", ex);
+                Log.Error(ex, "RabbitMQ connection error");
+                throw;
             }
         }
 
@@ -72,7 +71,7 @@ namespace UserService.Helpers
                                                basicProperties: properties,
                                                body: body);
 
-                _logger.LogInfo("Sent message: {0}", message);
+                Log.Information("Sent message: {Message}", message);
             });
         }
 

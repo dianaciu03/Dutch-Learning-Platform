@@ -36,14 +36,9 @@ namespace ContentService.Repositories
                 Console.WriteLine($"Exam with id {exam.id} was upserted successfully. Status code: {response.StatusCode}");
                 return exam.id;
             }
-            catch (CosmosException ex)
-            {
-                Console.WriteLine($"Error upserting exam practice: {ex.Message}");
-                return null;
-            }
             catch (Exception ex)
             {
-                Console.WriteLine($"Unexpected error: {ex.Message}");
+                Console.WriteLine($"Error upserting exam practice: {ex.Message}");
                 return null;
             }
         }
@@ -111,14 +106,9 @@ namespace ContentService.Repositories
 
                 return component.id;
             }
-            catch (CosmosException ex)
-            {
-                Console.WriteLine($"Error saving exam component: {ex.Message}");
-                return null;
-            }
             catch (Exception ex)
             {
-                Console.WriteLine($"Unexpected error: {ex.Message}");
+                Console.WriteLine($"Error saving exam component: {ex.Message}");
                 return null;
             }
         }
@@ -130,14 +120,9 @@ namespace ContentService.Repositories
                 var response = await _container.ReadItemAsync<ExamPractice>(examId, new PartitionKey(examId));
                 return response;
             }
-            catch (CosmosException ex)
-            {
-                Console.WriteLine($"Error fetching exam with ID {examId}: {ex.Message}");
-                return null;
-            }
             catch (Exception ex)
             {
-                Console.WriteLine($"Unexpected error: {ex.Message}");
+                Console.WriteLine($"Error fetching exam with ID {examId}: {ex.Message}");
                 return null;
             }
         }
@@ -205,7 +190,7 @@ namespace ContentService.Repositories
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error deleting first 100 exams: {ex.Message}");
+                Console.WriteLine($"Error deleting first 500 exams: {ex.Message}");
                 return -1;
             }
         }
@@ -229,7 +214,5 @@ namespace ContentService.Repositories
                 return false;
             }
         }
-
-
     }
 }

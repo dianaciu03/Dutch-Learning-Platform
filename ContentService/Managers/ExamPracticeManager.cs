@@ -6,23 +6,20 @@ using System.Threading.Tasks;
 using ContentService.Domain;
 using ContentService.DTOs;
 using ContentService.Domain.ExamComponents;
-using ContentService.Helpers;
 using ContentService.Interfaces;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client;
+using Serilog;
+using ContentService.Helpers;
 
 namespace ContentService.Managers
 {
     public class ExamPracticeManager : IExamPracticeManager
     {
-        private readonly RabbitMQConnection _rabbitMqConnection;
-        private readonly LogHelper<ExamPracticeManager> _logger;
         private readonly IExamPracticeRepository _examPracticeRepository;
 
-        public ExamPracticeManager(RabbitMQConnection rabbitMqConnection, IExamPracticeRepository examPracticeRepository)
+        public ExamPracticeManager(IExamPracticeRepository examPracticeRepository)
         {
-            _rabbitMqConnection = rabbitMqConnection;
-            _logger = new LogHelper<ExamPracticeManager>();
             _examPracticeRepository = examPracticeRepository;
         }
 
@@ -35,13 +32,13 @@ namespace ContentService.Managers
 
                 if (string.IsNullOrWhiteSpace(request.Name) || request.Name.Length > 100)
                 {
-                    _logger.LogWarning("Invalid exam name provided.");
+                    Log.Warning("Invalid exam name provided.");
                     return null;
                 }
 
                 if (request.MaxPoints <= 0 || request.MaxPoints > 1000)
                 {
-                    _logger.LogWarning("Inavlid number of points provided. The value should be between 0 and 1000.");
+                    Log.Warning("Invalid number of points provided. The value should be between 0 and 1000.");
                     return null;
                 }
 
@@ -58,16 +55,16 @@ namespace ContentService.Managers
 
                 if (id == null)
                 {
-                    _logger.LogWarning("Exam could not be created.");
+                    Log.Warning("Exam could not be created.");
                     return null;
                 }
 
-                _logger.LogInfo("Empty exam was updated: {0}", examPractice.Name);
+                Log.Information("Empty exam was updated: {ExamName}", examPractice.Name);
                 return id;
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error while processing exam.", ex);
+                Log.Error(ex, "Error while processing exam");
                 return null;
             }
         }
@@ -90,16 +87,16 @@ namespace ContentService.Managers
 
                 if (savedId == null)
                 {
-                    _logger.LogWarning("Reading component could not be created or updated.");
+                    Log.Warning("Reading component could not be created or updated.");
                     return null;
                 }
 
-                _logger.LogInfo("Reading component was created or updated: {0}", savedId);
+                Log.Information("Reading component was created or updated: {ComponentId}", savedId);
                 return savedId;
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error while processing reading component.", ex);
+                Log.Error(ex, "Error while processing reading component");
                 return null;
             }
         }
@@ -109,7 +106,7 @@ namespace ContentService.Managers
         {
             try
             {
-                _logger.LogInfo("Fetching exam with ID: {0}", id);
+                Log.Information("Fetching exam with ID: {ExamId}", id);
                 var examPractice = _examPracticeRepository.GetExamPracticeByIdAsync(id).Result;
 
                 if (examPractice == null)
@@ -121,7 +118,7 @@ namespace ContentService.Managers
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error while fetching exam.", ex);
+                Log.Error(ex, "Error while fetching exam");
                 return new ExamResponse { ExamList = new List<ExamPractice>() };
             }
         }
@@ -135,7 +132,7 @@ namespace ContentService.Managers
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error while getting all exams.", ex);
+                Log.Error(ex, "Error while getting all exams");
                 return new ExamResponse { ExamList = new List<ExamPractice>() };
             }
         }
@@ -157,7 +154,7 @@ namespace ContentService.Managers
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error while updating exam.", ex);
+                Log.Error(ex, "Error while updating exam");
                 return false;
             }
         }
@@ -167,7 +164,7 @@ namespace ContentService.Managers
         {
             try
             {
-                _logger.LogInfo("Deleting exam with ID: {0}", id);
+                Log.Information("Deleting exam with ID: {ExamId}", id);
 
                 var success = _examPracticeRepository.DeleteExamPracticeByIdAsync(id).Result;
 
@@ -175,7 +172,7 @@ namespace ContentService.Managers
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error while deleting exam.", ex);
+                Log.Error(ex, "Error while deleting exam");
                 return false;
             }
         }
@@ -184,7 +181,7 @@ namespace ContentService.Managers
         {
             try
             {
-                _logger.LogInfo("Deleting all exams.");
+                Log.Information("Deleting all exams");
 
                 var deletedCount = _examPracticeRepository.DeleteAllExamPracticesAsync().Result;
 
@@ -192,60 +189,9 @@ namespace ContentService.Managers
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error while deleting all exams.", ex);
+                Log.Error(ex, "Error while deleting all exams");
                 return -1;
             }
-        }
-
-        public async Task StartListeningAsync()
-        {
-            var channel = _rabbitMqConnection.GetChannel();
-            _logger.LogInfo("Listening to the channel {0}", channel);
-
-            // Declare the queue you want to listen to
-            await channel.QueueDeclareAsync(queue: "accountQueue", durable: true, exclusive: false, autoDelete: false);
-            _logger.LogInfo("Listening to the accountQueue...");
-
-            // Create a consumer
-            var consumer = new AsyncEventingBasicConsumer(channel);
-            consumer.ReceivedAsync += async (model, ea) =>
-            {
-                var body = ea.Body.ToArray();
-                var message = Encoding.UTF8.GetString(body);
-
-                // Extract account id from the message
-                var accountId = ExtractAccountId(message);
-
-                if (accountId.HasValue)
-                {
-                    // Fetch the user data (e.g., GetAllExamsByUserId)
-                    //var content = await _accountRepository.GetAllExamsByUserId(accountId.Value);
-                    _logger.LogInfo("Received the message and it contains the id: {0}", accountId);
-                }
-            };
-
-            // Start listening to the queue
-            await channel.BasicConsumeAsync(queue: "accountQueue", autoAck: true, consumer: consumer);
-
-            //_logger.LogInfo("Content service is listening for messages...");
-        }
-
-        private Guid? ExtractAccountId(string message)
-        {
-            // Assuming the message follows this format: "Account to delete: {id}"
-            if (message.StartsWith("Account to delete:"))
-            {
-                var parts = message.Split(':');
-                if (parts.Length > 1)
-                {
-                    string idPart = parts[1].Trim();
-                    if (Guid.TryParse(idPart, out Guid id))
-                    {
-                        return id;
-                    }
-                }
-            }
-            return null;
         }
     }
 }

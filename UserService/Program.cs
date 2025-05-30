@@ -4,6 +4,7 @@ using UserService.Helpers;
 using UserService.Interfaces;
 using UserService.Managers;
 using UserService.Repositories;
+using Serilog;
 
 namespace UserService
 {
@@ -11,113 +12,108 @@ namespace UserService
     {
         public static void Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
+            // Configure Serilog
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.Console()
+                .CreateLogger();
 
-            builder.Services.AddLogging();
-
-            // Check if the environment is Docker (from GitHub CI/CD pipeline)
-            var dockerEnv = Environment.GetEnvironmentVariable("DOCKER_ENV");
-            var integrationTestEnv = Environment.GetEnvironmentVariable("INTEGRATION_TEST_ENV");
-            Console.WriteLine($"DOCKER_ENV: {dockerEnv}");
-
-            var envPrefix = (dockerEnv == "true") ? "DOCKER_" : (integrationTestEnv == "true") ? "INT_TEST_" : "";
-
-            if (dockerEnv != "true")
+            try
             {
-                // LOCAL ENVIRONMENT
-                var envFilePath = Path.Combine(Directory.GetCurrentDirectory(), "..", ".env");
-                Env.Load(envFilePath);
-            }
+                Log.Information("Starting User Service...");
+                var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+                // Add Serilog to the builder
+                builder.Host.UseSerilog();
 
-            // Add services to the container.
-            builder.Services.AddScoped(typeof(LogHelper<>));
-            builder.Services.AddScoped<IAccountManager, AccountManager>();
+                // Check if the environment is Docker (from GitHub CI/CD pipeline)
+                var dockerEnv = Environment.GetEnvironmentVariable("DOCKER_ENV");
+                var integrationTestEnv = Environment.GetEnvironmentVariable("INTEGRATION_TEST_ENV");
+                Log.Information("DOCKER_ENV: {DockerEnv}", dockerEnv);
 
-            // Register CosmosDBConnection as a Singleton
-            builder.Services.AddSingleton<CosmosDBConnection>(sp =>
-            {
-                string connectionString = Environment.GetEnvironmentVariable($"{envPrefix}COSMOSDB_CONNECTION_STRING");
+                var envPrefix = (dockerEnv == "true") ? "DOCKER_" : (integrationTestEnv == "true") ? "INT_TEST_" : "";
 
-                // Check if the connection string is empty or null
-                if (string.IsNullOrEmpty(connectionString))
+                if (dockerEnv != "true")
                 {
-                    throw new InvalidOperationException("Cosmos DB connection string is not set.");
+                    // LOCAL ENVIRONMENT
+                    var envFilePath = Path.Combine(Directory.GetCurrentDirectory(), "..", ".env");
+                    Env.Load(envFilePath);
                 }
 
-                // Return the CosmosDB connection with the appropriate connection string
-                return new CosmosDBConnection(connectionString);
-            });
+                builder.Services.AddControllers();
+                // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+                builder.Services.AddEndpointsApiExplorer();
+                builder.Services.AddSwaggerGen();
 
+                // Add services to the container.
+                builder.Services.AddScoped<IAccountManager, AccountManager>();
 
-            // Register AccountRepository as implementation for IAccountRepository
-            builder.Services.AddScoped<IAccountRepository, AccountRepository>(sp =>
-            {
-                // Resolve CosmosDBConnection from DI container
-                var cosmosDBConnection = sp.GetRequiredService<CosmosDBConnection>();
-
-                string databaseName = Environment.GetEnvironmentVariable($"{envPrefix}COSMOSDB_DATABASE_NAME"); 
-                string containerName = Environment.GetEnvironmentVariable($"{envPrefix}COSMOSDB_CONTAINER_NAME_USER_SERVICE");
-
-                if (string.IsNullOrEmpty(databaseName) || string.IsNullOrEmpty(containerName))
+                // Register CosmosDBConnection as a Singleton
+                builder.Services.AddSingleton<CosmosDBConnection>(sp =>
                 {
-                    throw new InvalidOperationException("Cosmos DB database or container name is not set.");
+                    string connectionString = Environment.GetEnvironmentVariable($"{envPrefix}COSMOSDB_CONNECTION_STRING");
+                    if (string.IsNullOrEmpty(connectionString))
+                    {
+                        throw new InvalidOperationException("Cosmos DB connection string is not set.");
+                    }
+                    return new CosmosDBConnection(connectionString);
+                });
+
+                // Register RabbitMQConnection as a Singleton
+                builder.Services.AddSingleton<RabbitMQConnection>(sp =>
+                {
+                    string hostName = Environment.GetEnvironmentVariable($"{envPrefix}RABBITMQ_HOST") ?? "localhost";
+                    string userName = Environment.GetEnvironmentVariable($"{envPrefix}RABBITMQ_USERNAME") ?? "guest";
+                    string password = Environment.GetEnvironmentVariable($"{envPrefix}RABBITMQ_PASSWORD") ?? "guest";
+
+                    return new RabbitMQConnection(hostName, userName, password);
+                });
+
+                // Register AccountRepository as implementation for IAccountRepository
+                builder.Services.AddScoped<IAccountRepository, AccountRepository>(sp =>
+                {
+                    // Resolve CosmosDBConnection from DI container
+                    var cosmosDBConnection = sp.GetRequiredService<CosmosDBConnection>();
+
+                    string databaseName = Environment.GetEnvironmentVariable($"{envPrefix}COSMOSDB_DATABASE_NAME");
+                    string containerName = Environment.GetEnvironmentVariable($"{envPrefix}COSMOSDB_CONTAINER_NAME_USER_SERVICE");
+
+                    if (string.IsNullOrEmpty(databaseName) || string.IsNullOrEmpty(containerName))
+                    {
+                        throw new InvalidOperationException("Cosmos DB database or container name is not set.");
+                    }
+
+                    // Instantiate and return AccountRepository with dynamic database and container names
+                    return new AccountRepository(cosmosDBConnection, databaseName, containerName);
+                });
+
+                var app = builder.Build();
+
+                // Configure the HTTP request pipeline.
+                if (app.Environment.IsDevelopment())
+                {
+                    app.UseSwagger();
+                    app.UseSwaggerUI();
                 }
 
-                // Instantiate and return AccountRepository with dynamic database and container names
-                return new AccountRepository(cosmosDBConnection, databaseName, containerName);
-            });
+                // Enable Prometheus scraping at /metrics
+                app.UseRouting();
+                app.UseHttpMetrics();
+                app.MapMetrics();
 
-            // Register RabbitMQConnection as a Singleton
-            builder.Services.AddSingleton<RabbitMQConnection>(sp =>
-            {
-                string rabbitMqHost = Environment.GetEnvironmentVariable($"{envPrefix}RABBITMQ_HOST");
-                string rabbitMqUser = Environment.GetEnvironmentVariable($"{envPrefix}RABBITMQ_USER");
-                string rabbitMqPassword = Environment.GetEnvironmentVariable($"{envPrefix}RABBITMQ_PASSWORD");
+                app.UseHttpsRedirection();
+                app.UseAuthorization();
+                app.MapControllers();
 
-                if (string.IsNullOrEmpty(rabbitMqHost) || string.IsNullOrEmpty(rabbitMqUser) || string.IsNullOrEmpty(rabbitMqPassword))
-                {
-                    throw new InvalidOperationException($"RabbitMQ connection details are not set.");
-                }
-
-                // Return the RabbitMQ connection using the values fetched from the environment variables
-                return new RabbitMQConnection(rabbitMqHost, rabbitMqUser, rabbitMqPassword);
-            });
-
-            var app = builder.Build();
-
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
+                app.Run();
             }
-
-            // Enable Prometheus scraping at /metrics
-            app.UseRouting();
-            app.UseHttpMetrics(); // middleware that tracks request durations, status codes, etc.
-                                  // Add the /metrics endpoint for Prometheus
-
-            app.MapMetrics();  // This exposes metrics at the /metrics endpoint
-
-            //app.UseHttpsRedirection();
-            app.UseAuthorization();
-
-            if (dockerEnv == "true")
+            catch (Exception ex)
             {
-                // DOCKER ONLY
-                app.Urls.Add("http://0.0.0.0:8084");
-                //app.Urls.Add("https://0.0.0.0:8085");
+                Log.Fatal(ex, "User Service terminated unexpectedly");
             }
-
-            app.MapControllers();
-
-            app.Run();
-
+            finally
+            {
+                Log.CloseAndFlush();
+            }
         }
     }
 }
