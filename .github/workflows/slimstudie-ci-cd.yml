@@ -1,4 +1,4 @@
-name: CI/CD pipeline for SlimStudie
+name: SlimStudie Backend CI/CD
 #DEMO
 on:
   push:
