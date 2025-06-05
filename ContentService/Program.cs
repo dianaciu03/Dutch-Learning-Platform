@@ -59,7 +59,6 @@ namespace ContentService
                     string hostName = Environment.GetEnvironmentVariable($"{envPrefix}RABBITMQ_HOST") ?? "localhost";
                     string userName = Environment.GetEnvironmentVariable($"{envPrefix}RABBITMQ_USERNAME") ?? "guest";
                     string password = Environment.GetEnvironmentVariable($"{envPrefix}RABBITMQ_PASSWORD") ?? "guest";
-
                     return new RabbitMQConnection(hostName, userName, password);
                 });
 

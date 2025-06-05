@@ -102,6 +102,17 @@ namespace UserService
 
                 app.UseHttpsRedirection();
                 app.UseAuthorization();
+
+                if (dockerEnv == "true")
+                {
+                    // DOCKER ONLY
+                    app.Urls.Add("http://0.0.0.0:8084");
+                    //app.Urls.Add("https://0.0.0.0:8085");
+                }
+
+                // Add a health endpoint for Kubernetes liveness/readiness probes
+                app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
+
                 app.MapControllers();
 
                 app.Run();

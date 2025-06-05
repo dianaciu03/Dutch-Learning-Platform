@@ -106,7 +106,7 @@
                 }
             ],
             "UpstreamPathTemplate": "/accounts/{id}",
-            "UpstreamHttpMethod": [ "DELETE" ]
+            "UpstreamHttpMethod": [ "DELETE", "OPTIONS" ]
         }
     ],
     "GlobalConfiguration": {
