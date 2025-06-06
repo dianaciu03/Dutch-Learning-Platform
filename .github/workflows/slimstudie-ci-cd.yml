@@ -1,5 +1,5 @@
 name: SlimStudie Backend CI/CD
-# PLS
+
 on:
   push:
     branches: [ "main" ]
@@ -248,11 +248,10 @@ jobs:
       - name: Trigger Frontend Workflow
         uses: actions/github-script@v6
         with:
+          github-token: ${{ secrets.FRONTEND_REPO_TOKEN }}
           script: |
             await github.rest.repos.createDispatchEvent({
               owner: 'dianaciu03',
               repo: 'Dutch-Learnin-Platform-FrontEnd',
               event_type: 'trigger-event',
             });
-        env:
-          GITHUB_TOKEN: ${{ secrets.FRONTEND_REPO_TOKEN }}
