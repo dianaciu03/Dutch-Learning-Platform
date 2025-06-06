@@ -1,5 +1,5 @@
 name: SlimStudie Backend CI/CD
-#DEMO
+
 on:
   push:
     branches: [ "main" ]
@@ -239,3 +239,16 @@ jobs:
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/my-user-service:latest
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/my-content-service:latest
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/my-api-gateway:latest
+
+  # Job 7: Trigger Frontend Pipeline
+  trigger-frontend:
+    needs: docker-deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Frontend Workflow
+        run: |
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.FRONTEND_REPO_TOKEN }}" \
+            https://api.github.com/repos/dianaciu03/Dutch-Learnin-Platform-FrontEnd \
+            -d '{"event_type":"backend-finished"}'
