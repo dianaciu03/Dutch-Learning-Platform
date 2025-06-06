@@ -249,8 +249,7 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const octokit = require('@actions/github').getOctokit(process.env.FRONTEND_REPO_TOKEN);
-            await octokit.rest.repos.createDispatchEvent({
+            await github.rest.repos.createDispatchEvent({
               owner: 'dianaciu03',
               repo: 'Dutch-Learnin-Platform-FrontEnd',
               event_type: 'trigger-event',
