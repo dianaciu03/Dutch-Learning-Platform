@@ -246,9 +246,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Frontend Workflow
-        run: |
-          curl -X POST \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.FRONTEND_REPO_TOKEN }}" \
-            https://api.github.com/repos/dianaciu03/Dutch-Learnin-Platform-FrontEnd \
-            -d '{"event_type":"backend-finished"}'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const octokit = require('@actions/github').getOctokit(process.env.FRONTEND_REPO_TOKEN);
+            await octokit.rest.repos.createDispatchEvent({
+              owner: 'dianaciu03',
+              repo: 'Dutch-Learnin-Platform-FrontEnd',
+              event_type: 'trigger-event',
+            });
+        env:
+          GITHUB_TOKEN: ${{ secrets.FRONTEND_REPO_TOKEN }}
